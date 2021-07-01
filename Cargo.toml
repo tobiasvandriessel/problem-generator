@@ -1,13 +1,13 @@
 [package]
-name = "temp_problem_generator"
+name = "problem_generator"
 version = "0.1.0"
 authors = ["Tobias van Driessel <tobiasvandriessel@startmail.com>"]
 edition = "2018"
 license = "Apache-2.0"
 description = "TD Mk Landscape benchmark generator, for use with black-box optimizers."
-homepage = "https://github.com/tobiasvandriessel/temp_problem_generator"
+homepage = "https://github.com/tobiasvandriessel/problem_generator"
 #documentation = ""
-repository = "https://github.com/tobiasvandriessel/temp_problem_generator"
+repository = "https://github.com/tobiasvandriessel/problem_generator"
 readme = "README.md"
 keywords = ["problem", "generator", "benchmark", "landscape", "black-box" ]
 #categories = [""]

@@ -4,7 +4,9 @@
 <!-- TODO: abstract, paper, source code, install script, executable. -->
 <!-- example problem instance text file, with k = 5, o = 2, M = 10 -->
 
-This repository contains source code for the problem generator introduced in the workshop paper `Benchmark generator for TD Mk Landscapes' @ GECCO '21 Analysing Algorithmic Behaviour of Optimisation Heuristics Workshop, by Tobias van Driessel and Dirk Thierens. LINK TODO. The problem generator is a binary/library to generate TD Mk Landscapes (with fixed clique/subfunction size k, overlapping variables between cliques/subfunctions o, and number of branches in the clique tree b values). 
+This repository contains source code for the problem generator introduced in the workshop paper `Benchmark generator for TD Mk Landscapes' @ GECCO '21 Analysing Algorithmic Behaviour of Optimisation Heuristics Workshop, by Tobias van Driessel and Dirk Thierens. LINK TODO. 
+
+The problem generator is a binary/library to generate TD Mk Landscapes (with fixed clique/subfunction size k, overlapping variables between cliques/subfunctions o, and number of branches in the clique tree b values). 
 Main functionality:
 * generation of problems & calculation of these problems's global optimum (or optima)
 * generation of some input codomain files for the problem generation

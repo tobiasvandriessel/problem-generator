@@ -270,6 +270,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac74c624d6b2d21f425f752262f42188365d7b8ff1aff74c82e45136510a4857"
 
 [[package]]
+name = "problem_generator"
+version = "0.1.0"
+dependencies = [
+ "env_logger",
+ "indicatif",
+ "itertools",
+ "log",
+ "rand",
+ "rayon",
+ "ron",
+ "serde",
+ "structopt",
+ "structopt-derive",
+]
+
+[[package]]
 name = "proc-macro-error"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -470,22 +486,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "unicode-xid",
-]
-
-[[package]]
-name = "temp_problem_generator"
-version = "0.1.0"
-dependencies = [
- "env_logger",
- "indicatif",
- "itertools",
- "log",
- "rand",
- "rayon",
- "ron",
- "serde",
- "structopt",
- "structopt-derive",
 ]
 
 [[package]]
