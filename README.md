@@ -39,6 +39,7 @@ We introduce a publicly available benchmark generator for Tree Decomposition (TD
     - [Problem File Structure](#problem-file-structure)
 - [Example](#example)
 - [References](#references)
+- [License](#license)
 
 ## Quick Start
 
@@ -167,3 +168,19 @@ An example problem generated:
 \[1\] Darrell Whitley, Francisco Chicano, and Brian W Goldman. “Gray box optimization for Mk landscapes (NK landscapes and MAX-kSAT)”.
 
 \[2\] Dirk Thierens, Tobias van Driessel. “A Benchmark Generator of Tree Decomposition Mk Landscapes”.
+
+## License
+
+Copyright 2021 Tobias van Driessel
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
