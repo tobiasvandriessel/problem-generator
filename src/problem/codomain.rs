@@ -173,9 +173,13 @@ pub fn handle_input_configuration_file_return_hashmap(
     let codomain_function = experiment_parameters.codomain_function.clone();
 
     //if a output_directory path is passed, we use it, otherwise we default to our way of calculating where the file should go (into codomain_files)
-    let directory_path_buf = PathBuf::from(
-        output_codomain_folder.unwrap_or(&get_output_folder_path_from_configuration_file(input_configuration_file_path, "codomain_files")?),
-    );
+    let directory_path_buf = 
+        match output_codomain_folder {
+            Some(folder) => PathBuf::from(folder),
+            None => get_output_folder_path_from_configuration_file(input_configuration_file_path, "codomain_files")?,
+        };
+
+    println!("Used codomain folder: {:?}", &directory_path_buf);
 
     //Loop over all input parameters (using custom iterator)
     for input_parameters in experiment_parameters {

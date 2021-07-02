@@ -237,9 +237,11 @@ pub fn generate_codomain_and_problem(
     let codomain_function = configuration_parameters.codomain_function.clone();
 
     //if an output_problem_folder_path is passed, we use it, otherwise we default to our way of calculating where the file should go (into problems folder)
-    let output_problem_folder_path_buf = PathBuf::from(
-        output_problem_folder_path.unwrap_or(&get_output_folder_path_from_configuration_file(input_configuration_file_path, "problems")?),
-    );
+    let output_problem_folder_path_buf = 
+        match output_problem_folder_path {
+            Some(folder) => PathBuf::from(folder),
+            None => get_output_folder_path_from_configuration_file(input_configuration_file_path, "problems")?,
+        };
 
     //Loop over all input parameters (using custom iterator)
     for input_parameters in configuration_parameters {
