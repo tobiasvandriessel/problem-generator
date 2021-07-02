@@ -179,8 +179,6 @@ pub fn handle_input_configuration_file_return_hashmap(
             None => get_output_folder_path_from_configuration_file(input_configuration_file_path, "codomain_files")?,
         };
 
-    println!("Used codomain folder: {:?}", &directory_path_buf);
-
     //Loop over all input parameters (using custom iterator)
     for input_parameters in experiment_parameters {
         //Store 25 different 'codomains' per input_parameters instance
