@@ -819,126 +819,82 @@ impl CliqueTree {
         //         println!("difference in fitness with global optimum was: {}", (self.glob_optima_score - solution_fit.fitness).abs() );
         //         panic!("global optimum found, but my current accepted range is too small: ");
         //     }
-        if solution_fit.fitness == self.glob_optima_score
+        solution_fit.fitness == self.glob_optima_score
             || ((self.glob_optima_score - solution_fit.fitness).abs() < FITNESS_EPSILON
                 && self.glob_optima_strings.contains(&solution_fit.solution))
-        {
-            true
-        } else {
-            // if self.glob_optima_strings.len() < 10 {
-            //     assert!(!self.glob_optima_strings.contains(&solution_fit.solution));
-            // }
-            false
-        }
     }
 }
 
 pub fn is_better_solutionfit(solutionfit1: &SolutionFit, solutionfit2: &SolutionFit) -> bool {
-    if solutionfit1.fitness > solutionfit2.fitness
+    solutionfit1.fitness > solutionfit2.fitness
         && (solutionfit1.fitness - solutionfit2.fitness).abs() >= FITNESS_EPSILON
-    {
-        true
-    } else {
-        false
-    }
 }
 
 pub fn is_worse_solutionfit(solutionfit1: &SolutionFit, solutionfit2: &SolutionFit) -> bool {
-    if solutionfit1.fitness < solutionfit2.fitness
+    solutionfit1.fitness < solutionfit2.fitness
         && (solutionfit1.fitness - solutionfit2.fitness).abs() >= FITNESS_EPSILON
-    {
-        true
-    } else {
-        false
-    }
 }
 
 pub fn is_better_or_equal_solutionfit(
     solutionfit1: &SolutionFit,
     solutionfit2: &SolutionFit,
 ) -> bool {
-    if solutionfit1.fitness > solutionfit2.fitness
+    solutionfit1.fitness > solutionfit2.fitness
         || is_equal_solutionfit(solutionfit1, solutionfit2)
-    {
-        true
-    } else {
-        false
-    }
 }
 
 pub fn is_equal_solutionfit(solutionfit1: &SolutionFit, solutionfit2: &SolutionFit) -> bool {
-    if solutionfit1.fitness == solutionfit2.fitness
+    solutionfit1.fitness == solutionfit2.fitness
         || (solutionfit1.fitness - solutionfit2.fitness).abs() < FITNESS_EPSILON
             && solutionfit1.solution == solutionfit2.solution
-    {
-        true
-    } else {
-        false
-    }
 }
 
 pub fn is_better_fitness(fitness1: f64, fitness2: f64) -> bool {
-    if fitness1 > fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON {
-        true
-    } else {
-        false
-    }
+    fitness1 > fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON 
 }
 
 pub fn is_worse_fitness(fitness1: f64, fitness2: f64) -> bool {
-    if fitness1 < fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON {
-        true
-    } else {
-        false
-    }
+    fitness1 < fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON 
 }
 
 pub fn is_better_or_equal_fitness(fitness1: f64, fitness2: f64) -> bool {
-    if fitness1 > fitness2 || is_equal_fitness(fitness1, fitness2) {
-        true
-    } else {
-        false
-    }
+    fitness1 > fitness2 || is_equal_fitness(fitness1, fitness2) 
 }
 
 pub fn is_equal_fitness(fitness1: f64, fitness2: f64) -> bool {
-    if fitness1 == fitness2 || (fitness1 - fitness2).abs() < FITNESS_EPSILON {
-        true
-    } else {
-        false
-    }
+    (fitness1 - fitness2).abs() < FITNESS_EPSILON 
 }
 
 ///Get an iterator for all possible substrings of certain length
 pub fn get_possible_substrings_iter(length: u32) -> impl Iterator<Item = Vec<u32>> {
     assert_eq!(length < 32, true);
 
-    return (0..(1 << length)).map(move |substring_as_index| {
+    (0..(1 << length)).map(move |substring_as_index| {
         //bit shift to get vector representation of solution from bit string version
         (0..length)
             .rev()
             .map(|i| (substring_as_index >> i) & 1)
             .collect()
-    });
+    })
 }
 
 /// Get all possible (sub)strings for a given length (bits)
 pub fn get_possible_substrings(length: u32) -> Vec<Vec<u32>> {
     assert_eq!(length < 32, true);
 
-    return (0..(1 << length))
+    (0..(1 << length))
         .map(|substring_as_index| {
             (0..length)
                 .rev()
                 .map(|i| (substring_as_index >> i) & 1)
                 .collect()
         })
-        .collect();
+        .collect()
 }
 
 /// Get the separator substring for the child, by taking the string values from the parent clique
 ///   for the variable indices both in the parent clique and in the separator  
-fn get_separator_substring_from_string(separator: &Vec<u32>, glob_string: &Vec<u32>) -> Vec<u32> {
+fn get_separator_substring_from_string(separator: &[u32], glob_string: &[u32]) -> Vec<u32> {
     //Get the substring values from the parent clique for the variable indices both in the parent clique and in the separator
     let mut separator_substring = Vec::with_capacity(separator.len());
     //For every variable index in the child separator, find the index of that variable index in the parent clique,
@@ -952,9 +908,9 @@ fn get_separator_substring_from_string(separator: &Vec<u32>, glob_string: &Vec<u
 /// Get the separator substring for the child, by taking the substring values from the parent clique
 ///   for the variable indices both in the parent clique and in the separator  
 fn get_child_separator_substring(
-    clique: &Vec<u32>,
-    separator: &Vec<u32>,
-    clique_substring: &Vec<u32>,
+    clique: &[u32],
+    separator: &[u32],
+    clique_substring: &[u32],
 ) -> Vec<u32> {
     //Get the substring values from the parent clique for the variable indices both in the parent clique and in the separator
     let mut separator_substring = Vec::with_capacity(separator.len());
@@ -971,13 +927,13 @@ fn get_child_separator_substring(
 }
 
 ///Transform the passed substring into an index(bit value) that would point to that substring
-pub fn transform_substring_vector_to_index(substring: &Vec<u32>) -> u32 {
+pub fn transform_substring_vector_to_index(substring: &[u32]) -> u32 {
     let mut sum = 0;
     let mut current_bit_shift_amount = 0;
     //Calculate bit value using the input bit string
     for i in (0..substring.len()).rev() {
-        sum = sum + (substring[i as usize] << current_bit_shift_amount);
-        current_bit_shift_amount = current_bit_shift_amount + 1;
+        sum += substring[i as usize] << current_bit_shift_amount;
+        current_bit_shift_amount += 1;
     }
     sum
 }

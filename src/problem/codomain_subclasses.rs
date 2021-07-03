@@ -37,15 +37,15 @@ impl CodomainFunction {
     //Get string representation of CodomainFunction, for use with filenames
     pub fn to_io_string(&self) -> String {
         match &self {
-            CodomainFunction::Random => format!("random"),
-            CodomainFunction::Trap => format!("trap"),
-            CodomainFunction::DeceptiveTrap => format!("deceptive-trap"),
+            CodomainFunction::Random => "random".to_owned(),
+            CodomainFunction::Trap => "trap".to_owned(),
+            CodomainFunction::DeceptiveTrap => "deceptive-trap".to_owned(),
             CodomainFunction::NKq { q } => format!("nk-q-{}", q),
             CodomainFunction::NKp { p } => format!("nk-p-{}", p),
             CodomainFunction::RandomDeceptiveTrap { p_deceptive } => {
                 format!("random-deceptive-trap-{}", p_deceptive)
             }
-            CodomainFunction::Unknown => format!("unknown"),
+            CodomainFunction::Unknown => "unknown".to_owned(),
         }
     }
 }
@@ -179,7 +179,7 @@ pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64
 }
 
 ///Get the hamming distance to a solution, by counting the number of unequal bits in the bit strings
-fn get_hamming_distance_to_solution(target_solution: &Vec<u32>, solution: &Vec<u32>) -> u32 {
+fn get_hamming_distance_to_solution(target_solution: &[u32], solution: &[u32]) -> u32 {
     assert_eq!(target_solution.len(), solution.len());
 
     let mut distance = 0;

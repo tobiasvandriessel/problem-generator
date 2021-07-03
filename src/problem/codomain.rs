@@ -17,7 +17,7 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::path::PathBuf;
-use std::{collections::HashMap, ffi::OsString};
+use std::collections::HashMap;
 use std::{
     error::Error,
     fs::{self, remove_dir_all},
@@ -103,13 +103,13 @@ fn handle_folder(folder_path: PathBuf) -> Result<(), Box<dyn Error>> {
         .map(|file| file.unwrap())
         .filter(|file| {
             file.file_type().unwrap().is_dir()
-                && file.file_name() != OsString::from("codomain_generation")
+                && file.file_name() != "codomain_generation"
         })
         .map(|file| remove_dir_all(file.path()))
         .collect::<Result<Vec<()>, std::io::Error>>()?;
 
     //Then we read every codomain generation file from the codomain_generation folder
-    let mut codomain_generation_folder_path = PathBuf::from(folder_path);
+    let mut codomain_generation_folder_path = folder_path;
     codomain_generation_folder_path.push("codomain_generation");
     let file_entries: Vec<PathBuf> = codomain_generation_folder_path
         .read_dir()?
@@ -227,7 +227,7 @@ fn generate_and_write(
         input_parameters,
         codomain_function,
         output_file_path,
-        &generate_codomain(input_parameters, &codomain_function),
+        &generate_codomain(input_parameters, codomain_function),
     )?;
     Ok(())
 }
@@ -238,7 +238,7 @@ fn generate_write_return(
     codomain_function: &CodomainFunction,
     output_file_path: &Path,
 ) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
-    let codomain = generate_codomain(input_parameters, &codomain_function);
+    let codomain = generate_codomain(input_parameters, codomain_function);
     write_codomain(
         input_parameters,
         codomain_function,
@@ -271,7 +271,7 @@ fn write_codomain(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
     file_path: &Path,
-    codomain: &Vec<Vec<f64>>,
+    codomain: &[Vec<f64>],
 ) -> Result<(), Box<dyn Error>> {
     let file = File::create(file_path)?;
     let mut buf_writer = BufWriter::new(file);
@@ -279,7 +279,7 @@ fn write_codomain(
 
     //Write the codomain function on the first line
     writeln!(write_buffer, "{}", codomain_function)?;
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     //Write the input parameters on the second line
@@ -288,14 +288,14 @@ fn write_codomain(
         "{} {} {} {}",
         input_parameters.m, input_parameters.k, input_parameters.o, input_parameters.b
     )?;
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     //Write all codomain values on the subsequent lines
     for clique in codomain {
         for value in clique {
             writeln!(write_buffer, "{}", value)?;
-            buf_writer.write(&write_buffer.as_bytes())?;
+            buf_writer.write_all(write_buffer.as_bytes())?;
             write_buffer.clear();
         }
     }
