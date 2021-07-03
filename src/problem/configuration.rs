@@ -71,20 +71,17 @@ impl ConfigurationParameters {
         let b_begin: u32 = split_line.next().unwrap().parse()?;
         let b_end: u32 = split_line.next().unwrap().parse()?;
 
-        let mut m_begin = 0;
-        let mut m_end = 0;
-        if m_or_n == "M" {
-            m_begin = m_or_n_begin;
-            m_end = m_or_n_end;
-        } else if m_or_n == "N" {
-            if k_end - k_begin > 1 || o_end - o_begin > 1 {
-                Err("Can not use problem size in configuration when k and o are not one fixed value")?;
-            }
-            m_begin = get_m_for_min_problem_size(m_or_n_begin, k_begin, o_begin);
-            m_end = get_m_for_max_problem_size(m_or_n_end, k_begin, o_begin);
-        } else {
-            Err("First letter in configuration not recognized; not M or N")?;
-        }
+        let (m_begin, m_end) = 
+            if m_or_n == "M" {
+                (m_or_n_begin, m_or_n_end)
+            } else if m_or_n == "N" {
+                if k_end - k_begin > 1 || o_end - o_begin > 1 {
+                    return Err("Can not use problem size in configuration when k and o are not one fixed value".into());
+                }
+                (get_m_for_min_problem_size(m_or_n_begin, k_begin, o_begin), get_m_for_max_problem_size(m_or_n_end, k_begin, o_begin))
+            } else {
+                return Err("First letter in configuration not recognized; not M or N".into());
+            };
 
         let codomain_functions_split_line: Vec<&str> =
             content_iterator.next().unwrap().split(',').collect();
@@ -190,7 +187,6 @@ impl Iterator for ConfigurationParametersIterator {
                 self.o_begin,
                 self.b_begin,
             );
-            return Some(self.current_parameters.clone());
         } else {
             if self.current_parameters.b < self.b_end - 1 {
                 self.current_parameters.b += 1;
@@ -215,22 +211,19 @@ impl Iterator for ConfigurationParametersIterator {
                     }
                 }
             }
-
-            return Some(self.current_parameters.clone());
         }
+        Some(self.current_parameters.clone())
     }
 }
 
 //min problem size (incl. )
 fn get_m_for_min_problem_size(min_problem_size: u32, k: u32, o: u32) -> u32 {
     let a = (min_problem_size as i32 + (k - o) as i32 - k as i32) as f32 / (k - o) as f32;
-    let min_m_incl = (a.ceil() as i32).max(1) as u32;
-    min_m_incl
+    (a.ceil() as i32).max(1) as u32
 }
 
 //max problem size (excl. )
 fn get_m_for_max_problem_size(max_problem_size: u32, k: u32, o: u32) -> u32 {
     let a = (max_problem_size + (k - o) - k) as f32 / (k - o) as f32;
-    let max_m_excl = (a.ceil() as u32).max(2);
-    max_m_excl
+    (a.ceil() as u32).max(2)
 }

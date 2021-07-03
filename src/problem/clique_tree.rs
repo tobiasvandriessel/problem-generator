@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::{error::Error, str::Lines};
 
 use crate::problem::codomain_subclasses::CodomainFunction;
-use crate::problem::problem::Problem;
+use crate::problem::problem_generation::Problem;
 
 const FITNESS_EPSILON: f64 = 0.0000000001;
 

@@ -43,13 +43,13 @@ pub fn get_clique_tree_from_codomain_file(
     let skip_lines = if file_has_codomain_function { 2 } else { 1 };
 
     //Read codomain
-    let codomain = read_codomain(&input_parameters, &codomain_file_path, skip_lines)?;
+    let codomain = read_codomain(&input_parameters, codomain_file_path, skip_lines)?;
     //print!("For file {:?} ", file_path);
 
     //Generate a clique tree that adheres to the given input parameters. The clique tree also calculates the global optimum.
     let clique_tree = CliqueTree::new(
-        input_parameters.clone(),
-        codomain_function.clone(),
+        input_parameters,
+        codomain_function,
         codomain,
     );
 
@@ -62,11 +62,9 @@ pub fn get_clique_trees_paths_from_codomain_folder(
     folder_path: &Path,
     files_have_codomain_function: bool,
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
-    let entries: Vec<PathBuf> = folder_path
+    Ok(folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
-        .collect();
-    Ok(entries
         .into_iter()
         .map(|path| {
             (
@@ -89,13 +87,11 @@ pub fn get_folders_file_triples(
         let mut results_folder_path = PathBuf::from(input_folder_path);
         results_folder_path.push("results");
         let result = remove_dir_all(results_folder_path);
-        match result {
-            Err(err) => {
-                if err.kind() != std::io::ErrorKind::NotFound {
-                    return Err(err).map_err(|_error| "could not remove results folder".into());
-                }
+        
+        if let Err(err) = result {
+            if err.kind() != std::io::ErrorKind::NotFound {
+                return Err(err).map_err(|_error| "could not remove results folder".into());
             }
-            _ => (),
         }
     }
 

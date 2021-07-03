@@ -378,7 +378,7 @@ pub fn write_problem_to_file(
         clique_tree.input_parameters.o,
         clique_tree.input_parameters.b
     )?;
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     //Global optima fitness and solutions:
@@ -388,12 +388,12 @@ pub fn write_problem_to_file(
 
     //fitness
     writeln!(write_buffer, "{}", clique_tree.glob_optima_score)?;
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     //number_of_solutions
     writeln!(write_buffer, "{}", clique_tree.glob_optima_strings.len())?;
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     //solutions
@@ -403,7 +403,7 @@ pub fn write_problem_to_file(
         }
         writeln!(write_buffer)?;
     }
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     //Cliques/Subfunctions
@@ -417,7 +417,7 @@ pub fn write_problem_to_file(
         )?;
         writeln!(write_buffer)?;
     }
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     buf_writer.flush()?;
@@ -442,7 +442,7 @@ pub fn write_problem_to_file_ser(
         ron::ser::to_string_pretty(&problem, my_config).map_err(|_| "Serialization error!")?;
 
     write!(write_buffer, "{}", string)?;
-    buf_writer.write(&write_buffer.as_bytes())?;
+    buf_writer.write_all(write_buffer.as_bytes())?;
     write_buffer.clear();
 
     buf_writer.flush()?;
@@ -458,7 +458,7 @@ pub fn read_problem_from_file(file_path: &Path) -> Result<Problem, Box<dyn Error
 
     //Read input parameters
     let mut line = content_iter.next().ok_or("Empty problem file")??;
-    let parameters: Vec<&str> = line.split(" ").collect();
+    let parameters: Vec<&str> = line.split(' ').collect();
     if parameters.len() != 4 {
         return Err("not enough input parameters on first line of input file".into());
     }
