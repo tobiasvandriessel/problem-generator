@@ -1,4 +1,4 @@
-/*! 
+/*!
 
 The problem generator crate for TD Mk Landscape benchmark generation.
 
@@ -6,7 +6,7 @@ The problem generator crate for TD Mk Landscape benchmark generation.
 
 ### Library
 
-To use problem_generator in your project, you can simply add problem_generator into your ```cargo.toml```: 
+To use problem_generator in your project, you can simply add problem_generator into your ```cargo.toml```:
 
 ```toml
 [dependencies]

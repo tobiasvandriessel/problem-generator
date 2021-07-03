@@ -30,7 +30,7 @@ pub enum CodomainFunction {
     RandomDeceptiveTrap {
         p_deceptive: f64,
     },
-    Unknown
+    Unknown,
 }
 
 impl CodomainFunction {
@@ -42,9 +42,9 @@ impl CodomainFunction {
             CodomainFunction::DeceptiveTrap => format!("deceptive-trap"),
             CodomainFunction::NKq { q } => format!("nk-q-{}", q),
             CodomainFunction::NKp { p } => format!("nk-p-{}", p),
-            CodomainFunction::RandomDeceptiveTrap { p_deceptive} => {
+            CodomainFunction::RandomDeceptiveTrap { p_deceptive } => {
                 format!("random-deceptive-trap-{}", p_deceptive)
-            },
+            }
             CodomainFunction::Unknown => format!("unknown"),
         }
     }
@@ -57,9 +57,11 @@ impl fmt::Display for CodomainFunction {
             CodomainFunction::DeceptiveTrap => write!(f, "deceptive-trap"),
             CodomainFunction::NKq { q } => write!(f, "nk-q {}", q),
             CodomainFunction::NKp { p } => write!(f, "nk-p {}", p),
-            CodomainFunction::RandomDeceptiveTrap { p_deceptive: p_random } => {
+            CodomainFunction::RandomDeceptiveTrap {
+                p_deceptive: p_random,
+            } => {
                 write!(f, "random-deceptive-trap {}", p_random)
-            }, 
+            }
             CodomainFunction::Unknown => write!(f, "unknown"),
         }
     }
@@ -89,8 +91,8 @@ pub fn generate_random(input_parameters: &InputParameters) -> Vec<Vec<f64>> {
     codomain_tree
 }
 
-///Generate general deceptive trap values: 
-/// For each subfunction, the local deceptor / local deceptive attractor is a random bit string of length k 
+///Generate general deceptive trap values:
+/// For each subfunction, the local deceptor / local deceptive attractor is a random bit string of length k
 ///  and the local optimum is the inverse of that random bit string.
 /// The codomain values for each bit string other than these two is defined by their hamming distance to the local deceptive attractor:
 ///  0.9 - d * 0.9/k , where d is the hamming distance to the local deceptive attractor.
@@ -110,15 +112,14 @@ pub fn generate_trap_general(input_parameters: &InputParameters) -> Vec<Vec<f64>
 
         let mut codomain_clique = Vec::with_capacity(1 << k);
         for j in 0..(1 << k) {
-            // d 
+            // d
             let distance_to_deceptor =
                 get_hamming_distance_to_solution(&local_deceptor, &possible_clique_substrings[j]);
-            let value = 
-            //if local optimum
-            if distance_to_deceptor == k {
+            let value = if distance_to_deceptor == k {
+                //if local optimum
                 1.0
-            //otherwise it's the local deceptive attractor or any other bit string
             } else {
+                //otherwise it's the local deceptive attractor or any other bit string
                 0.9 - distance_to_deceptor as f64 * (0.9 / k as f64)
             };
             codomain_clique.push(value);
@@ -130,7 +131,7 @@ pub fn generate_trap_general(input_parameters: &InputParameters) -> Vec<Vec<f64>
 }
 
 ///Generate the codomain for the combination of random and deceptive trap codomain functions:
-/// With probability p_deceptive, each clique/subfunction is a deceptive trap function, 
+/// With probability p_deceptive, each clique/subfunction is a deceptive trap function,
 ///  and with probability (1 - p_deceptive) each clique/subfunction is a random function.
 pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64) -> Vec<Vec<f64>> {
     let mut rng = rand::thread_rng();
@@ -213,7 +214,6 @@ pub fn generate_trap(input_parameters: &InputParameters, d: f64) -> Vec<Vec<f64>
     (0..m).map(|_| codomain_clique.clone()).collect()
 }
 
-
 ///Generate NKq codomain values
 ///The q value indicates the highest integer value possible, every codomain value is generated randomly between 0..q(exclusive)
 pub fn generate_nk_q(input_parameters: &InputParameters, q: u32) -> Vec<Vec<f64>> {
@@ -268,7 +268,6 @@ pub fn generate_nk_p(input_parameters: &InputParameters, p: f64) -> Vec<Vec<f64>
 
     codomain
 }
-
 
 ///Count the number of ones in the bit string represented by and as the index
 fn count_ones(k: u32, index: u32) -> u32 {

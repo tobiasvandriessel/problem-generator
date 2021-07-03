@@ -12,9 +12,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use super::clique_tree::{CliqueTree, InputParameters};
 use super::codomain::read_codomain;
 use super::codomain_subclasses::CodomainFunction;
-use super::clique_tree::{InputParameters, CliqueTree};
 
 /// Construct and return clique tree using input codomain file; use codomain and input parameters.
 pub fn get_clique_tree_from_codomain_file(
@@ -62,7 +62,6 @@ pub fn get_clique_trees_paths_from_codomain_folder(
     folder_path: &Path,
     files_have_codomain_function: bool,
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
-
     let entries: Vec<PathBuf> = folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
@@ -78,8 +77,8 @@ pub fn get_clique_trees_paths_from_codomain_folder(
         .collect())
 }
 
-///Get from a folder the triples configuration_parameters - problem_folder - codomain_folder 
-/// from the problem_generation, problems, and codomain_files folders. 
+///Get from a folder the triples configuration_parameters - problem_folder - codomain_folder
+/// from the problem_generation, problems, and codomain_files folders.
 /// Each file in problem_generation is coupled with the corresponding folder in 'problems' and 'codomain_files'
 pub fn get_folders_file_triples(
     input_folder_path: &Path,
@@ -93,7 +92,7 @@ pub fn get_folders_file_triples(
         match result {
             Err(err) => {
                 if err.kind() != std::io::ErrorKind::NotFound {
-                    Err(err).map_err(|_error| "could not remove results folder")?;
+                    return Err(err).map_err(|_error| "could not remove results folder".into());
                 }
             }
             _ => (),
@@ -131,7 +130,12 @@ pub fn get_folders_file_triples(
     assert_eq!(file_entries.len(), problem_folder_entries.len());
 
     //And couple the matching entries (matching is ensured by the sorting, as the same name is used for all three)
-    Ok(izip!(file_entries, codomain_folder_entries, problem_folder_entries).collect())
+    Ok(izip!(
+        file_entries,
+        codomain_folder_entries,
+        problem_folder_entries
+    )
+    .collect())
 }
 
 /// Get the output folder path for a given input configuration file
@@ -141,16 +145,16 @@ pub fn get_output_folder_path_from_configuration_file(
     input_configuration_file_path: &Path,
     output_directory_name: &str,
 ) -> Result<PathBuf, Box<dyn Error>> {
-    let file_name = input_configuration_file_path
-        .file_stem()
-        .ok_or("could not get file stem of input configuration file while calculating output path")?;
+    let file_name = input_configuration_file_path.file_stem().ok_or(
+        "could not get file stem of input configuration file while calculating output path",
+    )?;
 
     let mut output_folder_path = PathBuf::from(
         input_configuration_file_path
-        .parent()
-        .ok_or("could not get parent")?
-        .parent()
-        .ok_or("could not get parent's parent")?
+            .parent()
+            .ok_or("could not get parent")?
+            .parent()
+            .ok_or("could not get parent's parent")?,
     );
     output_folder_path.push(output_directory_name);
     output_folder_path.push(file_name);

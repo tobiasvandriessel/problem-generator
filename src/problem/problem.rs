@@ -1,5 +1,5 @@
 /*!
-Module to generate problems (TD Mk Landscapes) using passed codomain, read these problems and write them (using (de)serialization ). 
+Module to generate problems (TD Mk Landscapes) using passed codomain, read these problems and write them (using (de)serialization ).
 */
 
 use serde::{Deserialize, Serialize};
@@ -99,21 +99,28 @@ pub fn run_opt(problem_opt: ProblemOpt) -> Result<(), Box<dyn Error>> {
                 generate_problems_from_codomain_folder(&folder_path, generated)?;
             }
             Ok(())
-        },
+        }
         ProblemCommand::ConfigurationFolder {
             folder_paths,
             number_of_problems_to_generate,
         } => {
             for folder_path in folder_paths {
-                generate_codomain_and_problem_from_folder(&folder_path, number_of_problems_to_generate)?;
+                generate_codomain_and_problem_from_folder(
+                    &folder_path,
+                    number_of_problems_to_generate,
+                )?;
             }
             Ok(())
-        },
+        }
         ProblemCommand::CodomainFile {
             input_codomain_file_path,
             output_problem_file_path,
             generated,
-        } => generate_problem_from_codomain_file(&input_codomain_file_path, &output_problem_file_path, generated),
+        } => generate_problem_from_codomain_file(
+            &input_codomain_file_path,
+            &output_problem_file_path,
+            generated,
+        ),
         ProblemCommand::ConfigurationFile {
             input_configuration_file_path,
             output_codomain_folder_path,
@@ -124,7 +131,7 @@ pub fn run_opt(problem_opt: ProblemOpt) -> Result<(), Box<dyn Error>> {
             Some(&output_codomain_folder_path),
             Some(&output_problem_folder_path),
             number_of_problems_to_generate,
-        ), 
+        ),
     }
 }
 
@@ -149,7 +156,7 @@ impl Problem {
     }
 }
 
-///Generate problems from the codomain and input parameters, 
+///Generate problems from the codomain and input parameters,
 /// which are both given by the files in the parent's codomain folder and write them to the parent's problems folder
 pub fn generate_problems_from_codomain_folder(
     parent_folder_path: &Path,
@@ -165,7 +172,7 @@ pub fn generate_problems_from_codomain_folder(
         .read_dir()?
         .map(|folder| folder.unwrap().path())
         .collect();
-    
+
     //For each folder f,
     for folder in folder_entries {
         // Create a directory in the problems folder with the same name (f)
@@ -215,8 +222,8 @@ pub fn generate_codomain_and_problem_from_folder(
     Ok(())
 }
 
-///Generate codomain and problem files for the input configuration as read from the input_configuration_file. 
-/// If the output_(codomain/problem)_folder_path is None, we default to folder paths used in other parts of the program (codomain_files & problems). 
+///Generate codomain and problem files for the input configuration as read from the input_configuration_file.
+/// If the output_(codomain/problem)_folder_path is None, we default to folder paths used in other parts of the program (codomain_files & problems).
 /// If they are Some(path), we use the path as the destination folder.
 pub fn generate_codomain_and_problem(
     input_configuration_file_path: &Path,
@@ -224,7 +231,7 @@ pub fn generate_codomain_and_problem(
     output_problem_folder_path: Option<&Path>,
     number_of_problems_to_generate: u32,
 ) -> Result<(), Box<dyn Error>> {
-    //Generate codomain from an input file (path), and insert in a hashmap the 25 generated codomains per input parameter configuration. 
+    //Generate codomain from an input file (path), and insert in a hashmap the 25 generated codomains per input parameter configuration.
     let mut input_parameters_codomain_hashmap = handle_input_configuration_file_return_hashmap(
         input_configuration_file_path,
         output_codomain_folder_path,
@@ -232,20 +239,22 @@ pub fn generate_codomain_and_problem(
     )?;
 
     //Get the configuration parameters from the input configuration file
-    let configuration_parameters = ConfigurationParameters::from_file(input_configuration_file_path)?;
+    let configuration_parameters =
+        ConfigurationParameters::from_file(input_configuration_file_path)?;
 
     let codomain_function = configuration_parameters.codomain_function.clone();
 
     //if an output_problem_folder_path is passed, we use it, otherwise we default to our way of calculating where the file should go (into problems folder)
-    let output_problem_folder_path_buf = 
-        match output_problem_folder_path {
-            Some(folder) => PathBuf::from(folder),
-            None => get_output_folder_path_from_configuration_file(input_configuration_file_path, "problems")?,
-        };
+    let output_problem_folder_path_buf = match output_problem_folder_path {
+        Some(folder) => PathBuf::from(folder),
+        None => get_output_folder_path_from_configuration_file(
+            input_configuration_file_path,
+            "problems",
+        )?,
+    };
 
     //Loop over all input parameters (using custom iterator)
     for input_parameters in configuration_parameters {
-
         //Get the stored codomain values for this input_parameters, (which contains the n codomain_values instances)
         let codomains = input_parameters_codomain_hashmap
             .remove(&input_parameters)
@@ -289,7 +298,7 @@ pub fn generate_problem_from_codomain_file(
     output_problem_file_path: &Path,
     generated: bool,
 ) -> Result<(), Box<dyn Error>> {
-    //Get the clique tree from the codomain file 
+    //Get the clique tree from the codomain file
     let clique_tree = get_clique_tree_from_codomain_file(codomain_file_path, generated)?;
     //Write the problem to file
     write_problem_to_file(&clique_tree, output_problem_file_path)
@@ -304,10 +313,12 @@ pub fn read_clique_tree_from_files(
     let problem = read_problem_from_file(problem_path)?;
     let skip_lines = if generated { 2 } else { 1 };
     let codomain = read_codomain(&problem.input_parameters, codomain_path, skip_lines)?;
-    Ok(CliqueTree::construct_from_problem_codomain(problem, codomain))
+    Ok(CliqueTree::construct_from_problem_codomain(
+        problem, codomain,
+    ))
 }
 
-///Read the TD Mk Landscapes / clique trees from the codomain and problem folders. 
+///Read the TD Mk Landscapes / clique trees from the codomain and problem folders.
 /// We return a Vector of tuples that contain both the clique tree and the path to the codomain file.
 ///  The path is required to construct the output file path.
 pub fn read_clique_trees_paths_from_folders(
@@ -334,7 +345,7 @@ pub fn read_clique_trees_paths_from_folders(
 
     let mut result_vec = Vec::new();
 
-    //zip the codomains and problems, and read the clique tree from the codomain and problem files. 
+    //zip the codomains and problems, and read the clique tree from the codomain and problem files.
     for (codomain_file_entry, problem_file_entry) in codomain_file_entries
         .into_iter()
         .zip(problem_file_entries.into_iter())
@@ -401,7 +412,9 @@ pub fn write_problem_to_file(
         for variable_index in clique {
             write!(write_buffer, "{} ", variable_index)?;
         }
-        write_buffer.pop().ok_or("could not remove trailing white space from clique indices while writing problem")?;
+        write_buffer.pop().ok_or(
+            "could not remove trailing white space from clique indices while writing problem",
+        )?;
         writeln!(write_buffer)?;
     }
     buf_writer.write(&write_buffer.as_bytes())?;
@@ -412,7 +425,7 @@ pub fn write_problem_to_file(
     Ok(())
 }
 
-///Write problem to file using serialization 
+///Write problem to file using serialization
 pub fn write_problem_to_file_ser(
     clique_tree: &CliqueTree,
     file_path: &Path,
@@ -423,7 +436,7 @@ pub fn write_problem_to_file_ser(
 
     let problem = Problem::new(clique_tree);
 
-    //Write problem to file 
+    //Write problem to file
     let my_config = ron::ser::PrettyConfig::new().with_depth_limit(4);
     let string =
         ron::ser::to_string_pretty(&problem, my_config).map_err(|_| "Serialization error!")?;
@@ -447,7 +460,7 @@ pub fn read_problem_from_file(file_path: &Path) -> Result<Problem, Box<dyn Error
     let mut line = content_iter.next().ok_or("Empty problem file")??;
     let parameters: Vec<&str> = line.split(" ").collect();
     if parameters.len() != 4 {
-        Err("not enough input parameters on first line of input file")?;
+        return Err("not enough input parameters on first line of input file".into());
     }
     //And set the parameters
     let m: u32 = parameters[0].parse()?;
@@ -460,17 +473,23 @@ pub fn read_problem_from_file(file_path: &Path) -> Result<Problem, Box<dyn Error
     let problem_size = (m - 1) * (k - o) + k;
 
     //Read global optmium score
-    line = content_iter.next().ok_or("No global optimum score in problem file")??;
+    line = content_iter
+        .next()
+        .ok_or("No global optimum score in problem file")??;
     let glob_optima_score: f64 = line.parse()?;
 
     //Read number_of_global_optima
-    line = content_iter.next().ok_or("No number_of_global_optima line in problem file")??;
+    line = content_iter
+        .next()
+        .ok_or("No number_of_global_optima line in problem file")??;
     let number_of_global_optima: usize = line.parse()?;
 
     //Read global optima
     let mut glob_optima_strings = Vec::with_capacity(number_of_global_optima);
     for _i in 0..number_of_global_optima {
-        line = content_iter.next().ok_or("Not enough global optima strings in problem file")??;
+        line = content_iter
+            .next()
+            .ok_or("Not enough global optima strings in problem file")??;
         let mut chars = line.chars();
         let mut global_optimum: Vec<u32> = Vec::with_capacity(problem_size as usize);
         for _j in 0..problem_size as usize {
@@ -488,10 +507,12 @@ pub fn read_problem_from_file(file_path: &Path) -> Result<Problem, Box<dyn Error
     //Read clique_tree cliques
     let mut cliques = Vec::with_capacity(m as usize);
     for _i in 0..m as usize {
-        line = content_iter.next().ok_or("Not enough cliques in problem file")??;
-        let variable_indices: Vec<&str> = line.split(" ").collect();
+        line = content_iter
+            .next()
+            .ok_or("Not enough cliques in problem file")??;
+        let variable_indices: Vec<&str> = line.split(' ').collect();
         if variable_indices.len() != k as usize {
-            Err("not enough variable indices in clique indices")?;
+            return Err("not enough variable indices in clique indices".into());
         }
         let mut clique_indices: Vec<u32> = Vec::with_capacity(k as usize);
         for j in 0..k as usize {

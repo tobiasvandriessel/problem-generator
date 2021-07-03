@@ -1,5 +1,5 @@
-use structopt::StructOpt;
 use problem_generator::problem::problem::ProblemOpt;
+use structopt::StructOpt;
 
 use std::process;
 

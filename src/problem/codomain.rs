@@ -8,9 +8,9 @@ use structopt::StructOpt;
 
 use super::io::get_output_folder_path_from_configuration_file;
 
-use super::configuration::ConfigurationParameters;
 use super::clique_tree::InputParameters;
 use super::codomain_subclasses::*;
+use super::configuration::ConfigurationParameters;
 
 use std::fmt::Write as fmtWrite;
 use std::fs::File;
@@ -78,7 +78,7 @@ pub fn run_opt(codomain_opt: CodomainOpt) -> Result<(), Box<dyn Error>> {
                 handle_folder(folder_path)?;
             }
             Ok(())
-        },
+        }
         CodomainCommand::File { file_path } => handle_input_configuration_file(file_path),
         CodomainCommand::Instance {
             m,
@@ -128,11 +128,16 @@ fn handle_folder(folder_path: PathBuf) -> Result<(), Box<dyn Error>> {
 
 ///Generate codomain from an input file (path), by reading the parameters from it,
 /// getting the output directory path from the filename and generating the codomain 25 times for all input parameters.
-fn handle_input_configuration_file(input_configuration_file_path: PathBuf) -> Result<(), Box<dyn Error>> {
+fn handle_input_configuration_file(
+    input_configuration_file_path: PathBuf,
+) -> Result<(), Box<dyn Error>> {
     let experiment_parameters = ConfigurationParameters::from_file(&input_configuration_file_path)?;
 
     let codomain_function = experiment_parameters.codomain_function.clone();
-    let directory_path_buf = get_output_folder_path_from_configuration_file(&input_configuration_file_path, "codomain_files")?;
+    let directory_path_buf = get_output_folder_path_from_configuration_file(
+        &input_configuration_file_path,
+        "codomain_files",
+    )?;
 
     //Loop over all input parameters (using custom iterator)
     for input_parameters in experiment_parameters {
@@ -173,11 +178,13 @@ pub fn handle_input_configuration_file_return_hashmap(
     let codomain_function = experiment_parameters.codomain_function.clone();
 
     //if a output_directory path is passed, we use it, otherwise we default to our way of calculating where the file should go (into codomain_files)
-    let directory_path_buf = 
-        match output_codomain_folder {
-            Some(folder) => PathBuf::from(folder),
-            None => get_output_folder_path_from_configuration_file(input_configuration_file_path, "codomain_files")?,
-        };
+    let directory_path_buf = match output_codomain_folder {
+        Some(folder) => PathBuf::from(folder),
+        None => get_output_folder_path_from_configuration_file(
+            input_configuration_file_path,
+            "codomain_files",
+        )?,
+    };
 
     //Loop over all input parameters (using custom iterator)
     for input_parameters in experiment_parameters {
@@ -232,7 +239,12 @@ fn generate_write_return(
     output_file_path: &Path,
 ) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
     let codomain = generate_codomain(input_parameters, &codomain_function);
-    write_codomain(input_parameters, codomain_function, output_file_path, &codomain)?;
+    write_codomain(
+        input_parameters,
+        codomain_function,
+        output_file_path,
+        &codomain,
+    )?;
     Ok(codomain)
 }
 
@@ -247,7 +259,7 @@ pub fn generate_codomain(
         CodomainFunction::DeceptiveTrap => generate_trap_general(input_parameters), // generate_trap(input_parameters, 1.0),
         CodomainFunction::NKq { q } => generate_nk_q(input_parameters, *q),
         CodomainFunction::NKp { p } => generate_nk_p(input_parameters, *p),
-        CodomainFunction::RandomDeceptiveTrap { p_deceptive} => {
+        CodomainFunction::RandomDeceptiveTrap { p_deceptive } => {
             generate_random_trap(input_parameters, *p_deceptive)
         }
         CodomainFunction::Unknown => panic!("We can't generate codomain for unknown codomain"),

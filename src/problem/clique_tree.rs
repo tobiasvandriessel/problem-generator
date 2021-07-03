@@ -19,8 +19,8 @@ pub struct SolutionFit {
     pub fitness: f64,
 }
 
-///Struct to contain the input parameters of the TD Mk Landscape: 
-/// Number of cliques/subfunctions M, 
+///Struct to contain the input parameters of the TD Mk Landscape:
+/// Number of cliques/subfunctions M,
 /// size k of each clique/subfunction,
 /// number of overlapping variables between cliques/subfunctions o,
 /// number of branches in the clique tree / tree decomposition b
@@ -74,7 +74,7 @@ impl InputParameters {
         //Split the line
         let parameters: Vec<&str> = line.split(" ").collect();
         if parameters.len() != 4 {
-            Err("not enough input parameters on first line of input file")?;
+            return Err("not enough input parameters on first line of input file".into());
         }
         //And set the parameters
         let m: u32 = parameters[0].parse()?;
@@ -84,9 +84,7 @@ impl InputParameters {
 
         Ok(InputParameters::new_from_primitives(m, k, o, b))
     }
-
 }
-
 
 #[repr(C)]
 #[derive(Debug)]
@@ -106,7 +104,6 @@ impl CliqueTree {
         codomain_function: CodomainFunction,
         codomain_values: Vec<Vec<f64>>,
     ) -> CliqueTree {
-
         //Create a new clique tree (as its cliques and separators)
         let (cliques, separators) = CliqueTree::construct(&input_parameters);
 
@@ -282,7 +279,7 @@ impl CliqueTree {
             2
         };
 
-        // [M][o] = [(best_string1, best_score), (best_string2, best_score)], so it saves the h_i by selecting 
+        // [M][o] = [(best_string1, best_score), (best_string2, best_score)], so it saves the h_i by selecting
         //   the best strings with their score for each x_a and x_b value
         //possible TODO: Can't we store the index of the substring instead of the substring, i.e. u32 instead of Vec<u32>?
         //This should make sure that the inner vectors are initialized
@@ -912,7 +909,7 @@ pub fn is_equal_fitness(fitness1: f64, fitness2: f64) -> bool {
     }
 }
 
-///Get an iterator for all possible substrings of certain length 
+///Get an iterator for all possible substrings of certain length
 pub fn get_possible_substrings_iter(length: u32) -> impl Iterator<Item = Vec<u32>> {
     assert_eq!(length < 32, true);
 
