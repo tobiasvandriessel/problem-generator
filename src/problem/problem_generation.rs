@@ -452,8 +452,8 @@ pub fn write_problem_to_file_ser(
 
 ///Read problem from file
 pub fn read_problem_from_file(file_path: &Path) -> Result<Problem, Box<dyn Error>> {
-    let f = File::open(file_path)?;
-    let reader = BufReader::new(f);
+    let file = File::open(file_path)?;
+    let reader = BufReader::new(file);
     let mut content_iter = reader.lines();
 
     //Read input parameters

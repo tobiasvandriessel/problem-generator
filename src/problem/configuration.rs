@@ -71,17 +71,19 @@ impl ConfigurationParameters {
         let b_begin: u32 = split_line.next().unwrap().parse()?;
         let b_end: u32 = split_line.next().unwrap().parse()?;
 
-        let (m_begin, m_end) = 
-            if m_or_n == "M" {
-                (m_or_n_begin, m_or_n_end)
-            } else if m_or_n == "N" {
-                if k_end - k_begin > 1 || o_end - o_begin > 1 {
-                    return Err("Can not use problem size in configuration when k and o are not one fixed value".into());
-                }
-                (get_m_for_min_problem_size(m_or_n_begin, k_begin, o_begin), get_m_for_max_problem_size(m_or_n_end, k_begin, o_begin))
-            } else {
-                return Err("First letter in configuration not recognized; not M or N".into());
-            };
+        let (m_begin, m_end) = if m_or_n == "M" {
+            (m_or_n_begin, m_or_n_end)
+        } else if m_or_n == "N" {
+            if k_end - k_begin > 1 || o_end - o_begin > 1 {
+                return Err("Can not use problem size in configuration when k and o are not one fixed value".into());
+            }
+            (
+                get_m_for_min_problem_size(m_or_n_begin, k_begin, o_begin),
+                get_m_for_max_problem_size(m_or_n_end, k_begin, o_begin),
+            )
+        } else {
+            return Err("First letter in configuration not recognized; not M or N".into());
+        };
 
         let codomain_functions_split_line: Vec<&str> =
             content_iterator.next().unwrap().split(',').collect();
@@ -187,30 +189,22 @@ impl Iterator for ConfigurationParametersIterator {
                 self.o_begin,
                 self.b_begin,
             );
+        } else if self.current_parameters.b < self.b_end - 1 {
+            self.current_parameters.b += 1;
+        } else if self.current_parameters.o < self.o_end - 1 {
+            self.current_parameters.o += 1;
+            self.current_parameters.b = self.b_begin;
+        } else if self.current_parameters.k < self.k_end - 1 {
+            self.current_parameters.k += 1;
+            self.current_parameters.o = self.o_begin;
+            self.current_parameters.b = self.b_begin;
+        } else if self.current_parameters.m < self.m_end - 1 {
+            self.current_parameters.m += 1;
+            self.current_parameters.k = self.k_begin;
+            self.current_parameters.o = self.o_begin;
+            self.current_parameters.b = self.b_begin;
         } else {
-            if self.current_parameters.b < self.b_end - 1 {
-                self.current_parameters.b += 1;
-            } else {
-                if self.current_parameters.o < self.o_end - 1 {
-                    self.current_parameters.o += 1;
-                    self.current_parameters.b = self.b_begin;
-                } else {
-                    if self.current_parameters.k < self.k_end - 1 {
-                        self.current_parameters.k += 1;
-                        self.current_parameters.o = self.o_begin;
-                        self.current_parameters.b = self.b_begin;
-                    } else {
-                        if self.current_parameters.m < self.m_end - 1 {
-                            self.current_parameters.m += 1;
-                            self.current_parameters.k = self.k_begin;
-                            self.current_parameters.o = self.o_begin;
-                            self.current_parameters.b = self.b_begin;
-                        } else {
-                            return None;
-                        }
-                    }
-                }
-            }
+            return None;
         }
         Some(self.current_parameters.clone())
     }

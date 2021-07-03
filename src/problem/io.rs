@@ -47,11 +47,7 @@ pub fn get_clique_tree_from_codomain_file(
     //print!("For file {:?} ", file_path);
 
     //Generate a clique tree that adheres to the given input parameters. The clique tree also calculates the global optimum.
-    let clique_tree = CliqueTree::new(
-        input_parameters,
-        codomain_function,
-        codomain,
-    );
+    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain);
 
     //and return result
     Ok(clique_tree)
@@ -87,7 +83,7 @@ pub fn get_folders_file_triples(
         let mut results_folder_path = PathBuf::from(input_folder_path);
         results_folder_path.push("results");
         let result = remove_dir_all(results_folder_path);
-        
+
         if let Err(err) = result {
             if err.kind() != std::io::ErrorKind::NotFound {
                 return Err(err).map_err(|_error| "could not remove results folder".into());

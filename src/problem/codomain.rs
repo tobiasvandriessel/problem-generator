@@ -12,12 +12,12 @@ use super::clique_tree::InputParameters;
 use super::codomain_subclasses::*;
 use super::configuration::ConfigurationParameters;
 
+use std::collections::HashMap;
 use std::fmt::Write as fmtWrite;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use std::path::Path;
 use std::path::PathBuf;
-use std::collections::HashMap;
 use std::{
     error::Error,
     fs::{self, remove_dir_all},
@@ -102,8 +102,7 @@ fn handle_folder(folder_path: PathBuf) -> Result<(), Box<dyn Error>> {
         .read_dir()?
         .map(|file| file.unwrap())
         .filter(|file| {
-            file.file_type().unwrap().is_dir()
-                && file.file_name() != "codomain_generation"
+            file.file_type().unwrap().is_dir() && file.file_name() != "codomain_generation"
         })
         .map(|file| remove_dir_all(file.path()))
         .collect::<Result<Vec<()>, std::io::Error>>()?;

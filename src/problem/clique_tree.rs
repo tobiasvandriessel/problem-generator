@@ -72,7 +72,7 @@ impl InputParameters {
             .next()
             .ok_or("Input file does not contain enough entries")?;
         //Split the line
-        let parameters: Vec<&str> = line.split(" ").collect();
+        let parameters: Vec<&str> = line.split(' ').collect();
         if parameters.len() != 4 {
             return Err("not enough input parameters on first line of input file".into());
         }
@@ -145,8 +145,8 @@ impl CliqueTree {
     ///Calculate the global optimum for a separable problem
     fn calculate_global_optimum_separable(
         input_parameters: &InputParameters,
-        codomain_values: &Vec<Vec<f64>>,
-        cliques: &Vec<Vec<u32>>,
+        codomain_values: &[Vec<f64>],
+        cliques: &[Vec<u32>],
     ) -> Vec<(Vec<u32>, f64)> {
         //Set score to 0 and glob_optimum string to all zeroes.
         let mut glob_opt_score = 0.0;
@@ -190,7 +190,7 @@ impl CliqueTree {
 
         //Construct the global optima
         CliqueTree::set_optimal_clique_substrings(
-            &input_parameters,
+            input_parameters,
             cliques,
             &mut result_optima_strings,
             &clique_optimas,
@@ -208,9 +208,9 @@ impl CliqueTree {
     ///When there are more than one optimal substrings for a clique, we clone the current global optima and then set all the values.
     fn set_optimal_clique_substrings(
         input_parameters: &InputParameters,
-        cliques: &Vec<Vec<u32>>,
+        cliques: &[Vec<u32>],
         result_optima_strings: &mut Vec<Vec<u32>>,
-        clique_optimas: &Vec<Vec<u32>>,
+        clique_optimas: &[Vec<u32>],
         current_index: usize,
     ) {
         //If we handled all the cliques, exit.
@@ -256,9 +256,9 @@ impl CliqueTree {
     pub fn calculate_global_optima(
         input_parameters: &InputParameters,
         codomain_function: &CodomainFunction,
-        codomain_values: &Vec<Vec<f64>>,
-        cliques: &Vec<Vec<u32>>,
-        separators: &Vec<Vec<u32>>,
+        codomain_values: &[Vec<f64>],
+        cliques: &[Vec<u32>],
+        separators: &[Vec<u32>],
     ) -> Vec<(Vec<u32>, f64)> {
         //If the problem is separable, we use a simple optimizer.
         if input_parameters.o == 0 {
@@ -299,8 +299,8 @@ impl CliqueTree {
         let mut start_indices = Vec::new();
         while sum < input_parameters.m {
             start_indices.push(sum);
-            sum = sum + input_parameters.b.pow(l);
-            l = l + 1;
+            sum += input_parameters.b.pow(l);
+            l += 1;
         }
 
         //Set lowest level and its start index
@@ -322,7 +322,7 @@ impl CliqueTree {
         for i in (1..input_parameters.m).rev() {
             //Keep track of current level in the tree, and the current start index for that level
             if i < start_index_current_level {
-                current_level = current_level - 1;
+                current_level -= 1;
                 start_index_current_level = start_indices[current_level as usize];
             }
 
@@ -364,19 +364,18 @@ impl CliqueTree {
                             // then retrieving the stored score of the child using the separator substring index.
                             let separator_substring_index_version =
                                 transform_substring_vector_to_index(&separator_substring);
-                            score = score
-                                + best_scores[child_index as usize]
-                                    [separator_substring_index_version as usize][0]
-                                    .1;
+                            score += best_scores[child_index as usize]
+                                [separator_substring_index_version as usize][0]
+                                .1;
                             //h_child
                         }
                     }
                     //store temporarily highest score in scores
                     //This already allows for multiple highest scores
-                    if scores.len() > 0 && is_better_fitness(score, highest_score) {
+                    if !scores.is_empty() && is_better_fitness(score, highest_score) {
                         scores.clear();
                     }
-                    if scores.len() == 0 || is_better_or_equal_fitness(score, highest_score) {
+                    if scores.is_empty() || is_better_or_equal_fitness(score, highest_score) {
                         //TODO: Here I could store k instead of the substring!
                         scores.push((
                             possible_clique_without_separator_substrings[k].clone(),
@@ -428,18 +427,17 @@ impl CliqueTree {
                 // then retrieving the stored score of the child using the separator substring index.
                 let separator_substring_index_version =
                     transform_substring_vector_to_index(&separator_substring);
-                score = score
-                    + best_scores[child_index as usize][separator_substring_index_version as usize]
-                        [0]
+                score += best_scores[child_index as usize]
+                    [separator_substring_index_version as usize][0]
                     .1;
             }
 
             //store temporarily highest score in scores
             //This already allows for multiple highest scores
-            if scores.len() > 0 && is_better_fitness(score, highest_score) {
+            if !scores.is_empty() && is_better_fitness(score, highest_score) {
                 scores.clear();
             }
-            if scores.len() == 0 || is_better_or_equal_fitness(score, highest_score) {
+            if scores.is_empty() || is_better_or_equal_fitness(score, highest_score) {
                 //TODO: Here I could store k instead of the substring!
                 scores.push((possible_clique_substrings[c].clone(), score));
                 highest_score = score;
@@ -496,7 +494,7 @@ impl CliqueTree {
         //Calculate the end of the loop
         let mut division = (input_parameters.m - 1) / input_parameters.b;
         if (input_parameters.m - 1) % input_parameters.b > 0 {
-            division = division + 1;
+            division += 1;
         }
 
         //Go until latest node/clique with children
@@ -504,7 +502,7 @@ impl CliqueTree {
             if (current_level as usize) < (start_indices.len() - 1) {
                 //Increase the current level in the tree when the considered index is at the next level's start index
                 if i >= start_indices[(current_level + 1) as usize] {
-                    current_level = current_level + 1;
+                    current_level += 1;
                     start_index_current_level = start_indices[current_level as usize];
                 }
 
@@ -533,7 +531,7 @@ impl CliqueTree {
                         //Construct child's separator values using the global string values and the stored indices of the separator.
                         let separator_substring = get_separator_substring_from_string(
                             &separators[current_child_index as usize],
-                            &glob_opt_string,
+                            glob_opt_string,
                         );
 
                         //Get index for that substring, to index into h
@@ -673,7 +671,7 @@ impl CliqueTree {
         let mut division = (input_parameters.m - 1) / b;
         //If a clique should construct at least one child, it is considered as well.
         if (input_parameters.m - 1) % b > 0 {
-            division = division + 1;
+            division += 1;
         }
 
         //Dit kan nog geoptimaliseerd worden door die separator_count en variables_to_add ertussenuit te halen,
@@ -721,7 +719,7 @@ impl CliqueTree {
                 //Add the new clique and separator to the clique and separator list, increase the count of constructed cliques.
                 cliques.push(new_clique);
                 separators.push(new_separator);
-                count = count + 1;
+                count += 1;
             }
         }
 
@@ -788,7 +786,7 @@ impl CliqueTree {
     }
 
     ///Calculate the fitnesss of a passed solution
-    pub fn calculate_fitness(&self, solution: &Vec<u32>, number_evaluations: &mut u32) -> f64 {
+    pub fn calculate_fitness(&self, solution: &[u32], number_evaluations: &mut u32) -> f64 {
         //First set the fitness to 0.0
         let mut fitness = 0.0;
 
@@ -839,8 +837,7 @@ pub fn is_better_or_equal_solutionfit(
     solutionfit1: &SolutionFit,
     solutionfit2: &SolutionFit,
 ) -> bool {
-    solutionfit1.fitness > solutionfit2.fitness
-        || is_equal_solutionfit(solutionfit1, solutionfit2)
+    solutionfit1.fitness > solutionfit2.fitness || is_equal_solutionfit(solutionfit1, solutionfit2)
 }
 
 pub fn is_equal_solutionfit(solutionfit1: &SolutionFit, solutionfit2: &SolutionFit) -> bool {
@@ -850,24 +847,24 @@ pub fn is_equal_solutionfit(solutionfit1: &SolutionFit, solutionfit2: &SolutionF
 }
 
 pub fn is_better_fitness(fitness1: f64, fitness2: f64) -> bool {
-    fitness1 > fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON 
+    fitness1 > fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON
 }
 
 pub fn is_worse_fitness(fitness1: f64, fitness2: f64) -> bool {
-    fitness1 < fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON 
+    fitness1 < fitness2 && (fitness1 - fitness2).abs() >= FITNESS_EPSILON
 }
 
 pub fn is_better_or_equal_fitness(fitness1: f64, fitness2: f64) -> bool {
-    fitness1 > fitness2 || is_equal_fitness(fitness1, fitness2) 
+    fitness1 > fitness2 || is_equal_fitness(fitness1, fitness2)
 }
 
 pub fn is_equal_fitness(fitness1: f64, fitness2: f64) -> bool {
-    (fitness1 - fitness2).abs() < FITNESS_EPSILON 
+    (fitness1 - fitness2).abs() < FITNESS_EPSILON
 }
 
 ///Get an iterator for all possible substrings of certain length
 pub fn get_possible_substrings_iter(length: u32) -> impl Iterator<Item = Vec<u32>> {
-    assert_eq!(length < 32, true);
+    assert!(length < 32);
 
     (0..(1 << length)).map(move |substring_as_index| {
         //bit shift to get vector representation of solution from bit string version
@@ -880,7 +877,7 @@ pub fn get_possible_substrings_iter(length: u32) -> impl Iterator<Item = Vec<u32
 
 /// Get all possible (sub)strings for a given length (bits)
 pub fn get_possible_substrings(length: u32) -> Vec<Vec<u32>> {
-    assert_eq!(length < 32, true);
+    assert!(length < 32);
 
     (0..(1 << length))
         .map(|substring_as_index| {
