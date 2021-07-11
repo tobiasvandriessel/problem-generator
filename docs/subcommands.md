@@ -1,3 +1,5 @@
+[Back to root](index.md)
+
 # Subcommands
 
 The problem generator has various subcommands to switch between input modes: 
@@ -65,3 +67,6 @@ An example run:
 ```
     problem_generator codomain_folder test_folder
 ```
+
+
+[Back to root](index.md)
