@@ -121,10 +121,10 @@ As options for the codomain we currently offer: *Random*, *Deceptive Trap*, *NKq
 
 Then we use the executable *problem\_generator* to generate the codomain files and the problems (25 for each configuration), and find the global optimum for each problem: 
 ``` 
-    problem_generator configuration_file -n 25 FILE 
+    problem_generator configuration_file -n 25 CONF_FILE 
         CODOMAIN_OUT PROBLEM_OUT
 ```
-where `CODOMAIN_OUT` and `PROBLEM_OUT` are the (existing) output codomain folder and output problem folder.
+where `CONF_FILE` is the input configuration file, `CODOMAIN_OUT` is the (existing) output codomain folder and `PROBLEM_OUT` is the (existing) output problem folder.
 
 #### Codomain Input
 

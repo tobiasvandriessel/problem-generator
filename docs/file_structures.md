@@ -15,9 +15,9 @@ The input configuration file is used to generate deceptive trap problems with to
     k INCL_START_K EXCL_END_K
     o INCL_START_O EXCL_END_O
     b INCL_START_B EXCL_END_B
-    CODOMAIN_CLASS [CODOMAIN_CLASS_PAR]
+    CODOMAIN_CLASS [CODOMAIN_CLASS_PAR...]
 ```
-where `M`, `k`, `o`, and `b` are literals and `INCL_START_X` and `EXCL_END_X` represent the to be inserted values of the start (incl.) and end (excl.) values for that variable `X`. 
+where `M`, `k`, `o`, and `b` are literals and `INCL_START_X` and `EXCL_END_X` represent the to be inserted values of the start (incl.) and end (excl.) values for that variable `X`. `CODOMAIN_CLASS` is the used codomain class and `CODOMAIN_CLASS_PAR` are any parameters for the codomain class.
 
 For example, if we use $M \in \{1, ..., 49\}$, $k = 5$, $o = 1$, $b = 1$, and the deceptive trap codomain function: 
 ```
