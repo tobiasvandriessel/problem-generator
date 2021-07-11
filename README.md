@@ -95,7 +95,7 @@ There are multiple options to choose from:
 
 ### Documentation 
 
-[Documentation](https://tobiasvandriessel.github.io/problem-generator/)
+[Documentation](https://tobiasvandriessel.github.io/problem-generator/) is currently work in progress.
 
 ### Problem Generation
 
