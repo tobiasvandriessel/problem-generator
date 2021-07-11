@@ -4,9 +4,10 @@
 <!-- TODO: abstract, paper, source code, install script, executable. -->
 <!-- example problem instance text file, with k = 5, o = 2, M = 10 -->
 
-This repository contains source code for the problem generator introduced in the workshop paper `Benchmark generator for TD Mk Landscapes' @ GECCO '21 Analysing Algorithmic Behaviour of Optimisation Heuristics Workshop, by Tobias van Driessel and Dirk Thierens. LINK TODO. 
+This repository contains source code for the problem generator introduced in the workshop paper `Benchmark generator for TD Mk Landscapes' @ GECCO '21 Analysing Algorithmic Behaviour of Optimisation Heuristics Workshop, by Tobias van Driessel and Dirk Thierens : [https://dl.acm.org/doi/10.1145/3449726.3463177](https://dl.acm.org/doi/10.1145/3449726.3463177). This workshop paper was a part of my [master thesis research](https://www.dropbox.com/s/8gcxlszjxumogys/TDMkLandscape_poster.pdf?dl=0).
 
-The problem generator is a binary/library to generate TD Mk Landscapes (with fixed clique/subfunction size k, overlapping variables between cliques/subfunctions o, and number of branches in the clique tree b values). 
+The problem generator is a binary/library to generate TD Mk Landscapes, which are useful for benchmarking Black Box Optimizers. 
+<!-- (with fixed clique/subfunction size k, overlapping variables between cliques/subfunctions o, and number of branches in the clique tree b values)-->
 Main functionality:
 * generation of problems & calculation of these problems's global optimum (or optima)
 * generation of some input codomain files for the problem generation
@@ -32,12 +33,12 @@ We introduce a publicly available benchmark generator for Tree Decomposition (TD
 - [Installation](#installation)
   - [Binary](#binary-1)
 - [Usage](#usage)
+  - [Documentation](#documentation)
   - [Problem Generation](#problem-generation)
     - [Configuration Input](#configuration-input)
     - [Codomain Input](#codomain-input)
     - [Codomain File Structure](#codomain-file-structure)
     - [Problem File Structure](#problem-file-structure)
-- [Example](#example)
 - [References](#references)
 - [License](#license)
 
@@ -45,7 +46,7 @@ We introduce a publicly available benchmark generator for Tree Decomposition (TD
 
 ### Binary 
 
-The quickest way to start is by using ```cargo install problem_generator``` if you already have Rust installed or downloading the executable from the Release page if you don't.
+The quickest way to start is by using ```cargo install problem_generator``` if you already have Rust installed or downloading the executable from the [Release](https://github.com/tobiasvandriessel/problem-generator/releases/latest) page if you don't.
 Create a new root directory, where we will store the codomain and problem folders in, and create a new configuration file to generate some problems:
 ```
 mkdir example/problem_generation -p
@@ -72,6 +73,8 @@ To use problem_generator in your project, you can simply add problem_generator i
 problem_generator = "^0.1.0"
 ```
 
+The library documentation can be found on [doc.rs](https://docs.rs/problem_generator/0.1.0).
+
 ## Installation
 
 ### Binary
@@ -90,9 +93,13 @@ There are multiple options to choose from:
 
 ## Usage
 
+### Documentation 
+
+[Documentation](https://tobiasvandriessel.github.io/problem-generator/)
+
 ### Problem Generation
 
-The problem generator can take as input a configuration folder, a codomain folder, a configuration file, or a codomain file. Here, we highlight how to use the generator with a configuration file and codomain file, and refer the reader to the documentation for the instructions on how to run the generator with multiple configuration files in a folder or multiple codomain files in a folder.
+The problem generator can take as input a configuration folder, a codomain folder, a configuration file, or a codomain file. Here, we highlight how to use the generator with a configuration file and codomain file, and refer the reader to the [documentation](https://tobiasvandriessel.github.io/problem-generator/) for the instructions on how to run the generator with multiple configuration files in a folder or multiple codomain files in a folder.
 
 #### Configuration Input
 
@@ -160,7 +167,7 @@ An example problem generated:
     1 0 6 4 8
 ```
 
-## Example
+<!-- ## Example -->
 
 
 ## References 
