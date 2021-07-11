@@ -28,6 +28,7 @@ We introduce a publicly available benchmark generator for Tree Decomposition (TD
 - [Workshop paper](#workshop-paper)
   - [Abstract](#abstract)
 - [Quick Start](#quick-start)
+  - [Example output problem](#example-output-problem)
   - [Binary](#binary)
   - [Library](#library)
 - [Installation](#installation)
@@ -43,6 +44,10 @@ We introduce a publicly available benchmark generator for Tree Decomposition (TD
 - [License](#license)
 
 ## Quick Start
+
+### Example output problem
+
+An example output problem can be found in the [data/](https://github.com/tobiasvandriessel/problem-generator/tree/main/data/) folder, if one only wishes to use an example output problem.
 
 ### Binary 
 
