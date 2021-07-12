@@ -1,3 +1,10 @@
+## Documentation Pages
+
+- [Index](index.md)
+  - [Subcommands](subcommands.md)
+  - [File Structures](file_structures.md)
+  - [Installation](installation.md)
+
 # Problem Generator - A TD Mk Landscape benchmark generator
 
 Main functionality:

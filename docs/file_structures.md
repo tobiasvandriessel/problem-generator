@@ -1,4 +1,9 @@
-[Back to root](index.md)
+## Documentation Pages
+
+- [Index](index.md)
+  - [Subcommands](subcommands.md)
+  - [File Structures](file_structures.md)
+  - [Installation](installation.md)
 
 # File Structures
 
@@ -69,5 +74,3 @@ An example problem generated:
     5 3 2 1 7
     1 0 6 4 8
 ```
-
-[Back to root](index.md)

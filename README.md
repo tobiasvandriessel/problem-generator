@@ -42,7 +42,7 @@ An example output problem can be found in the [data/](https://github.com/tobiasv
 
 ### Binary 
 
-The quickest way to start is by using ```cargo install problem_generator``` if you already have Rust installed or downloading the executable from the [Release](https://github.com/tobiasvandriessel/problem-generator/releases/latest) page if you don't.
+The quickest way to start is by using ```cargo install problem_generator``` if you already have Rust installed or downloading the executable from the [Release](https://github.com/tobiasvandriessel/problem-generator/releases/latest) page if you don't. See [Installation](#installation) for more information.
 Create a new root directory, where we will store the codomain and problem folders in, and create a new configuration file to generate some problems:
 ```
 mkdir example/problem_generation -p

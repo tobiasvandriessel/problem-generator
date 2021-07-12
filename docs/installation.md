@@ -1,4 +1,9 @@
-[Back to root](index.md)
+## Documentation Pages
+
+- [Index](index.md)
+  - [Subcommands](subcommands.md)
+  - [File Structures](file_structures.md)
+  - [Installation](installation.md)
 
 # Installation
 
@@ -15,5 +20,3 @@ There are multiple options to choose from:
 	2. Then checkout this repository ```git clone https://github.com/tobiasvandriessel/problem-generator && cd problem-generator```  
 	3. and run ```cargo install --path .``` or ```cargo build --release```, 
 	     depending on whether you want it installed or just built.  
-
-[Back to root](index.md)

@@ -1,12 +1,17 @@
-[Back to root](index.md)
+## Documentation Pages
+
+- [Index](index.md)
+  - [Subcommands](subcommands.md)
+  - [File Structures](file_structures.md)
+  - [Installation](installation.md)
 
 # Subcommands
 
 The problem generator has various subcommands to switch between input modes: 
-- [configuration_file](#configurationfile): single configuration file
-- [codomain_file](#codomainfile): single codomain file
-- [configuration_folder](#configurationfolder): multiple configuration files in a folder
-- [codomain_folder](#codomainfolder): multiple codomain files in a folder
+- [configuration_file](#configuration_file): single configuration file
+- [codomain_file](#codomain_file): single codomain file
+- [configuration_folder](#configuration_folder): multiple configuration files in a folder
+- [codomain_folder](#codomain_folder): multiple codomain files in a folder
 
 ## configuration_file
 
@@ -68,5 +73,3 @@ An example run:
     problem_generator codomain_folder test_folder
 ```
 
-
-[Back to root](index.md)
