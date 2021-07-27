@@ -7,7 +7,8 @@ fn main() {
 
     cbindgen::Builder::new()
       .with_crate(crate_dir)
+      .with_language(cbindgen::Language::Cxx)
       .generate()
       .expect("Unable to generate bindings")
-      .write_to_file("td_mk_landscape.h");
+      .write_to_file("problem_generator.h");
 }
