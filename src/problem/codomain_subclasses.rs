@@ -12,6 +12,7 @@ use rand::distributions::Uniform;
 use rand::prelude::*;
 
 ///Enum to represent various codomain classes
+#[repr(C)]
 #[derive(Debug, StructOpt, PartialOrd, PartialEq, Clone)]
 #[structopt()]
 pub enum CodomainFunction {

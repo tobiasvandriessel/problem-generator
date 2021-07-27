@@ -27,3 +27,6 @@ indicatif = {version = "0.15.0", features = ["rayon"]}
 serde = { version = "1.0", features = ["derive"] }
 ron = "0.6.4"
 itertools = "0.10.0"
+
+[build-dependencies]
+cbindgen = "0.19.0"

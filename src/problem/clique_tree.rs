@@ -24,6 +24,7 @@ pub struct SolutionFit {
 /// size k of each clique/subfunction,
 /// number of overlapping variables between cliques/subfunctions o,
 /// number of branches in the clique tree / tree decomposition b
+#[repr(C)]
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 pub struct InputParameters {
     pub m: u32,
@@ -86,7 +87,6 @@ impl InputParameters {
     }
 }
 
-#[repr(C)]
 #[derive(Debug)]
 ///The CliqueTree struct with properties input parameters, clique variable indices, the used codomain function, codomain values, global optimum strings and score
 pub struct CliqueTree {
