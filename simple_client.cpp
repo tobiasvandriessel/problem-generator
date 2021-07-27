@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include "problem_generator.h"
 
 using namespace std;
@@ -18,9 +19,16 @@ int main() {
     codomainFunction.tag = CodomainFunction::Tag::DeceptiveTrap; 
 
     CliqueTree* cliqueTree = construct_clique_tree(inputParameters, codomainFunction);
+    const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
 
-    double fitness = evaluate_solution(cliqueTree, solution, length);
+    double fitness = evaluate_solution(cliqueTree, x.data(), x.size());
+    // double fitness = evaluate_solution(cliqueTree, solution, length);
     cout << "Fitness: " << fitness << endl;
 
     free_clique_tree(cliqueTree);
+}
+
+
+double evaluate (const std::vector<int> &x) {
+    return 1.0;
 }

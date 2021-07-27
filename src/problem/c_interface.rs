@@ -28,7 +28,7 @@ pub extern "C" fn free_clique_tree(
 #[no_mangle]
 pub extern "C" fn evaluate_solution(
     clique_tree_ptr: *mut CliqueTree,
-    solution: *const u32,
+    solution: *const i32,
     len: usize
 ) -> f64 {
     let clique_tree = unsafe {
@@ -42,5 +42,5 @@ pub extern "C" fn evaluate_solution(
     };
 
     let mut num_eval = 0;
-    clique_tree.calculate_fitness(solution_slice, &mut num_eval)
+    clique_tree.calculate_fitness_int(solution_slice, &mut num_eval)
 }

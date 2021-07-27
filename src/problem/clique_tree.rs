@@ -786,6 +786,31 @@ impl CliqueTree {
     }
 
     ///Calculate the fitnesss of a passed solution
+    pub fn calculate_fitness_int(&self, solution: &[i32], number_evaluations: &mut u32) -> f64 {
+        //First set the fitness to 0.0
+        let mut fitness = 0.0;
+
+        //Then loop over all the cliques
+        for clique_index in 0..self.cliques.len() {
+            //And for each clique calculate the solution substring for this clique, as an index into an array of these substrings.
+            let mut clique_substring_as_index = 0;
+            //Create variable to conveniently store reference to the current clique in.
+            let clique = &self.cliques[clique_index];
+            //Go over each variable index in the clique and for each one, take the bit value from the solution string and add it to the clique substring.
+            for j in (0..clique.len()).rev() {
+                clique_substring_as_index += (solution[clique[j] as usize] as u32) << (clique.len() - j - 1);
+            }
+
+            //Add the fitness contribution of this clique
+            fitness += self.codomain_values[clique_index][clique_substring_as_index as usize];
+        }
+
+        *number_evaluations += 1;
+
+        fitness
+    }
+
+    ///Calculate the fitnesss of a passed solution
     pub fn calculate_fitness(&self, solution: &[u32], number_evaluations: &mut u32) -> f64 {
         //First set the fitness to 0.0
         let mut fitness = 0.0;
