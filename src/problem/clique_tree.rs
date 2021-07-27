@@ -798,7 +798,7 @@ impl CliqueTree {
             let clique = &self.cliques[clique_index];
             //Go over each variable index in the clique and for each one, take the bit value from the solution string and add it to the clique substring.
             for j in (0..clique.len()).rev() {
-                clique_substring_as_index += (solution[clique[j] as usize] as u32) << (clique.len() - j - 1);
+                clique_substring_as_index += solution[clique[j] as usize] << (clique.len() - j - 1);
             }
 
             //Add the fitness contribution of this clique
