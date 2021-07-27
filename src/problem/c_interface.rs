@@ -1,3 +1,5 @@
+use std::slice;
+
 use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codomain, codomain_subclasses::CodomainFunction};
 
 #[no_mangle]
@@ -20,5 +22,25 @@ pub extern "C" fn free_clique_tree(
     unsafe {
         Box::from_raw(clique_tree_ptr);
     }
+}
 
+
+#[no_mangle]
+pub extern "C" fn evaluate_solution(
+    clique_tree_ptr: *mut CliqueTree,
+    solution: *const u32,
+    len: usize
+) -> f64 {
+    let clique_tree = unsafe {
+        assert!(!clique_tree_ptr.is_null());
+        &*clique_tree_ptr
+    };
+    let solution_slice = unsafe {
+        assert!(!solution.is_null());
+
+        slice::from_raw_parts(solution, len)
+    };
+
+    let mut num_eval = 0;
+    clique_tree.calculate_fitness(solution_slice, &mut num_eval)
 }
