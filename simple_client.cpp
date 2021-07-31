@@ -32,6 +32,7 @@ int main() {
         glob_optima_solutions[i] = new int[length];
     }
     write_global_optima_to_pointer(cliqueTree, glob_optima_solutions);
+    std::vector<std::vector<int>> glob_optima_vector;
 
     for(int i = 0; i < num_glob_opt; i++) {
         cout << "global optima " << i << ": " << endl;
@@ -39,6 +40,13 @@ int main() {
             cout << glob_optima_solutions[i][j];
         }
         cout << endl;
+
+        std::vector<int> glob_opt(glob_optima_solutions[i], glob_optima_solutions[i] + length);
+        for(int j = 0; j < length; j++) {
+            cout << glob_opt[j];
+        }
+        cout << endl;
+        glob_optima_vector.push_back(glob_opt);
     }
     free_clique_tree(cliqueTree);
 }
