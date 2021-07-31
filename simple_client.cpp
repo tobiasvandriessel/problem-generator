@@ -47,6 +47,12 @@ int main() {
         // cout << endl;
         glob_optima_vector.push_back(glob_opt);
     }
+
+    for(int i = 0; i < num_glob_opt; i++) {
+        delete [] glob_optima_solutions[i];
+    }
+    delete [] glob_optima_solutions;
+
     free_clique_tree(cliqueTree);
 }
 
