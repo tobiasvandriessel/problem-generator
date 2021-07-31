@@ -846,6 +846,18 @@ impl CliqueTree {
             || ((self.glob_optima_score - solution_fit.fitness).abs() < FITNESS_EPSILON
                 && self.glob_optima_strings.contains(&solution_fit.solution))
     }
+
+    // pub fn is_global_optimum_solution_score(&self, solution: &[i32], score: f64) -> bool {
+    //     // if solution_fit.fitness != self.glob_optima_score
+    //     //     && (self.glob_optima_score - solution_fit.fitness).abs() < 0.0000000001
+    //     //     && (self.glob_optima_score - solution_fit.fitness).abs() >= FITNESS_EPSILON {
+    //     //         println!("difference in fitness with global optimum was: {}", (self.glob_optima_score - solution_fit.fitness).abs() );
+    //     //         panic!("global optimum found, but my current accepted range is too small: ");
+    //     //     }
+    //     score == self.glob_optima_score
+    //         || ((self.glob_optima_score - score).abs() < FITNESS_EPSILON
+    //             && self.glob_optima_strings.iter().any(|x| x == solution as &[u32]))
+    // }
 }
 
 pub fn is_better_solutionfit(solutionfit1: &SolutionFit, solutionfit2: &SolutionFit) -> bool {
