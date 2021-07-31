@@ -5,7 +5,6 @@
 using namespace std;
 
 int main() {
-    cout << "Hello world" << endl;
     InputParameters inputParameters = InputParameters();
     inputParameters.m = 9;
     inputParameters.k = 3;
@@ -21,8 +20,7 @@ int main() {
     const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
 
     double fitness = evaluate_solution(cliqueTree, x.data(), x.size());
-    // double fitness = evaluate_solution(cliqueTree, solution, length);
-    cout << "Fitness: " << fitness << endl;
+    // cout << "Fitness: " << fitness << endl;
 
     uintptr_t num_glob_opt = get_number_of_global_optima(cliqueTree);
     double glob_opt_score = get_score_of_global_optima(cliqueTree);
@@ -31,21 +29,22 @@ int main() {
     for(int i = 0; i < num_glob_opt; i++) {
         glob_optima_solutions[i] = new int[length];
     }
+
     write_global_optima_to_pointer(cliqueTree, glob_optima_solutions);
     std::vector<std::vector<int>> glob_optima_vector;
 
     for(int i = 0; i < num_glob_opt; i++) {
-        cout << "global optima " << i << ": " << endl;
-        for(int j = 0; j < length; j++) {
-            cout << glob_optima_solutions[i][j];
-        }
-        cout << endl;
+        // cout << "global optima " << i << ": " << endl;
+        // for(int j = 0; j < length; j++) {
+        //     cout << glob_optima_solutions[i][j];
+        // }
+        // cout << endl;
 
         std::vector<int> glob_opt(glob_optima_solutions[i], glob_optima_solutions[i] + length);
-        for(int j = 0; j < length; j++) {
-            cout << glob_opt[j];
-        }
-        cout << endl;
+        // for(int j = 0; j < length; j++) {
+        //     cout << glob_opt[j];
+        // }
+        // cout << endl;
         glob_optima_vector.push_back(glob_opt);
     }
     free_clique_tree(cliqueTree);

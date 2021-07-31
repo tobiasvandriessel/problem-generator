@@ -89,7 +89,7 @@ pub extern "C" fn write_global_optima_to_pointer(
 
     for (i, glob_opt) in clique_tree.glob_optima_strings.iter().enumerate() {
 
-        println!("Rust glob opt {}: \n {:?}", i, glob_opt);
+        //println!("Rust glob opt {}: \n {:?}", i, glob_opt);
         unsafe {
             let array_slice = {
                 assert!(!arrays_slice[i].is_null());
