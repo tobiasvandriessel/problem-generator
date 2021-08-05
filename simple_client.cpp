@@ -7,6 +7,9 @@ using namespace std;
 
 const double FITNESS_EPSILON = 0.0000000001;
 
+std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t numGlobOpt, uintptr_t length);
+bool isGlobalOptimum(double globOptimaScore, const std::vector<std::vector<int>> &globOptimaVector, const std::vector<int> &x, double score);
+
 int main() {
     InputParameters inputParameters = InputParameters();
     inputParameters.m = 9;
