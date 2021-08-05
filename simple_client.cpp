@@ -26,15 +26,27 @@ int main() {
     uintptr_t num_glob_opt = get_number_of_global_optima(cliqueTree);
     double glob_opt_score = get_score_of_global_optima(cliqueTree);
 
-    int** glob_optima_solutions = new int*[num_glob_opt];
-    for(int i = 0; i < num_glob_opt; i++) {
+    std::vector<std::vector<int>> glob_optima_vector = getGlobalOptima(cliqueTree, num_glob_opt, length);
+
+    double fitness = evaluate_solution(cliqueTree, x.data(), x.size());
+    bool globalOptimumFound = isGlobalOptimum(glob_opt_score, glob_optima_vector, x, fitness);
+    // cout << "Fitness: " << fitness << endl;
+
+
+    free_clique_tree(cliqueTree);
+}
+
+std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t numGlobOpt, uintptr_t length) {
+
+    int** glob_optima_solutions = new int*[numGlobOpt];
+    for(int i = 0; i < numGlobOpt; i++) {
         glob_optima_solutions[i] = new int[length];
     }
 
     write_global_optima_to_pointer(cliqueTree, glob_optima_solutions);
     std::vector<std::vector<int>> glob_optima_vector;
 
-    for(int i = 0; i < num_glob_opt; i++) {
+    for(int i = 0; i < numGlobOpt; i++) {
         // cout << "global optima " << i << ": " << endl;
         // for(int j = 0; j < length; j++) {
         //     cout << glob_optima_solutions[i][j];
@@ -48,17 +60,12 @@ int main() {
         // cout << endl;
         glob_optima_vector.push_back(glob_opt);
     }
-
-    double fitness = evaluate_solution(cliqueTree, x.data(), x.size());
-    bool globalOptimumFound = isGlobalOptimum(glob_opt_score, glob_optima_vector, x, fitness);
-    // cout << "Fitness: " << fitness << endl;
-
-    for(int i = 0; i < num_glob_opt; i++) {
+    for(int i = 0; i < numGlobOpt; i++) {
         delete [] glob_optima_solutions[i];
     }
     delete [] glob_optima_solutions;
 
-    free_clique_tree(cliqueTree);
+    return glob_optima_vector;
 }
 
 
