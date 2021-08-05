@@ -1,7 +1,9 @@
 #include <iostream>
 #include <algorithm>
+#include <set>
 #include <vector>
 #include "problem_generator.h"
+#include <stdexcept>
 
 using namespace std;
 
@@ -13,9 +15,9 @@ class CliqueTreeC {
         CliqueTree* cliqueTree;
 
         double globOptScore;
-        std::vector<std::vector<int>> globOptimaVector;
+        std::set<std::vector<int>> globOptimaVector;
 
-        std::vector<std::vector<int>> getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length);
+        std::set<std::vector<int>> getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length);
         bool isGlobalOptimum(const std::vector<int> &x, double score);
 
     public:
@@ -70,9 +72,7 @@ double CliqueTreeC::evaluate(const std::vector<int> &x) {
     return globalOptimumFound;
 }
 
-// TODO: Maybe use std::set to find whether the global optima vector/set contains the given solution much faster in the isGlobalOptimum function. 
-//   Note that it first must be close to the optimal value, however there might still be a lot of global optima.
-std::vector<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length) {
+std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length) {
 
     int** glob_optima_solutions = new int*[numGlobOpt];
     for(int i = 0; i < numGlobOpt; i++) {
@@ -80,7 +80,7 @@ std::vector<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt,
     }
 
     write_global_optima_to_pointer(this->cliqueTree, glob_optima_solutions);
-    std::vector<std::vector<int>> glob_optima_vector;
+    std::set<std::vector<int>> glob_optima_vector;
 
     for(int i = 0; i < numGlobOpt; i++) {
         // cout << "global optima " << i << ": " << endl;
@@ -94,7 +94,11 @@ std::vector<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt,
         //     cout << glob_opt[j];
         // }
         // cout << endl;
-        glob_optima_vector.push_back(glob_opt);
+        auto result = glob_optima_vector.insert(glob_opt);
+        if (!result.second) {
+            throw std::logic_error("Global optima are not unique...");
+        }
+
     }
 
     for(int i = 0; i < numGlobOpt; i++) {
@@ -106,11 +110,9 @@ std::vector<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt,
 }
 
 
-// TODO: Maybe use std::set to find whether the global optima vector/set contains the given solution much faster. 
-//   Note that it first must be close to the optimal value, however there might still be a lot of global optima.
 bool CliqueTreeC::isGlobalOptimum(const std::vector<int> &x, double score) {
 
     return (score == this->globOptScore || (
-        std::abs(score - this->globOptScore) < FITNESS_EPSILON && std::find(globOptimaVector.begin(), globOptimaVector.end(), x) != globOptimaVector.end()
+        std::abs(score - this->globOptScore) < FITNESS_EPSILON && this->globOptimaVector.find(x) != this->globOptimaVector.end() 
     ));
 }
