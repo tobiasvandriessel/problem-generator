@@ -10,6 +10,22 @@ const double FITNESS_EPSILON = 0.0000000001;
 std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t numGlobOpt, uintptr_t length);
 bool isGlobalOptimum(double globOptimaScore, const std::vector<std::vector<int>> &globOptimaVector, const std::vector<int> &x, double score);
 
+class CliqueTreeC {
+    private: 
+        InputParameters inputParameters;
+        uintptr_t length;
+        CodomainFunction codomainFunction;
+        CliqueTree* cliqueTree;
+
+        double glob_opt_score;
+        std::vector<std::vector<int>> globOptimaVector;
+
+    public:
+        CliqueTreeC(InputParameters &inputParameters, CodomainFunction &codomainFunction );
+        ~CliqueTreeC();
+        double evaluate(std::vector<int> &x);
+};
+
 int main() {
     InputParameters inputParameters = InputParameters();
     inputParameters.m = 9;
@@ -39,6 +55,8 @@ int main() {
     free_clique_tree(cliqueTree);
 }
 
+// TODO: Maybe use std::set to find whether the global optima vector/set contains the given solution much faster in the isGlobalOptimum function. 
+//   Note that it first must be close to the optimal value, however there might still be a lot of global optima.
 std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t numGlobOpt, uintptr_t length) {
 
     int** glob_optima_solutions = new int*[numGlobOpt];
@@ -63,6 +81,7 @@ std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t 
         // cout << endl;
         glob_optima_vector.push_back(glob_opt);
     }
+
     for(int i = 0; i < numGlobOpt; i++) {
         delete [] glob_optima_solutions[i];
     }
