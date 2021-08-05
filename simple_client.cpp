@@ -7,23 +7,24 @@ using namespace std;
 
 const double FITNESS_EPSILON = 0.0000000001;
 
-std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t numGlobOpt, uintptr_t length);
-bool isGlobalOptimum(double globOptimaScore, const std::vector<std::vector<int>> &globOptimaVector, const std::vector<int> &x, double score);
 
 class CliqueTreeC {
     private: 
-        InputParameters inputParameters;
-        uintptr_t length;
-        CodomainFunction codomainFunction;
         CliqueTree* cliqueTree;
 
-        double glob_opt_score;
+        double globOptScore;
         std::vector<std::vector<int>> globOptimaVector;
 
+        std::vector<std::vector<int>> getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length);
+        bool isGlobalOptimum(const std::vector<int> &x, double score);
+
     public:
-        CliqueTreeC(InputParameters &inputParameters, CodomainFunction &codomainFunction );
+        bool globalOptimumFound;
+
+        CliqueTreeC(InputParameters inputParameters, CodomainFunction codomainFunction );
         ~CliqueTreeC();
-        double evaluate(std::vector<int> &x);
+
+        double evaluate(const std::vector<int> &x);
 };
 
 int main() {
@@ -33,38 +34,52 @@ int main() {
     inputParameters.o = 2;
     inputParameters.b = 2;
 
-    uintptr_t length = (inputParameters.m - 1) * (inputParameters.k - inputParameters.o) + inputParameters.k;
-
     CodomainFunction codomainFunction = CodomainFunction();
     codomainFunction.tag = CodomainFunction::Tag::DeceptiveTrap; 
 
-    CliqueTree* cliqueTree = construct_clique_tree(inputParameters, codomainFunction);
     const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
 
+    CliqueTreeC cliqueTree(inputParameters, codomainFunction);
 
-    uintptr_t num_glob_opt = get_number_of_global_optima(cliqueTree);
-    double glob_opt_score = get_score_of_global_optima(cliqueTree);
+    double fitness = cliqueTree.evaluate(x);
 
-    std::vector<std::vector<int>> glob_optima_vector = getGlobalOptima(cliqueTree, num_glob_opt, length);
-
-    double fitness = evaluate_solution(cliqueTree, x.data(), x.size());
-    bool globalOptimumFound = isGlobalOptimum(glob_opt_score, glob_optima_vector, x, fitness);
     // cout << "Fitness: " << fitness << endl;
 
+}
 
-    free_clique_tree(cliqueTree);
+CliqueTreeC::CliqueTreeC(InputParameters inputParameters, CodomainFunction codomainFunction ) {
+
+    uintptr_t length = (inputParameters.m - 1) * (inputParameters.k - inputParameters.o) + inputParameters.k;
+
+    this->cliqueTree = construct_clique_tree(inputParameters, codomainFunction);
+
+    uintptr_t num_glob_opt = get_number_of_global_optima(this->cliqueTree);
+    this->globOptScore = get_score_of_global_optima(this->cliqueTree);
+
+    this->globOptimaVector = this->getGlobalOptima(num_glob_opt, length);
+    this->globalOptimumFound = false;
+}
+
+CliqueTreeC::~CliqueTreeC(){
+    free_clique_tree(this->cliqueTree);
+}
+
+double CliqueTreeC::evaluate(const std::vector<int> &x) {
+    double fitness = evaluate_solution(this->cliqueTree, x.data(), x.size());
+    bool globalOptimumFound = this->isGlobalOptimum(x, fitness);
+    return globalOptimumFound;
 }
 
 // TODO: Maybe use std::set to find whether the global optima vector/set contains the given solution much faster in the isGlobalOptimum function. 
 //   Note that it first must be close to the optimal value, however there might still be a lot of global optima.
-std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t numGlobOpt, uintptr_t length) {
+std::vector<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length) {
 
     int** glob_optima_solutions = new int*[numGlobOpt];
     for(int i = 0; i < numGlobOpt; i++) {
         glob_optima_solutions[i] = new int[length];
     }
 
-    write_global_optima_to_pointer(cliqueTree, glob_optima_solutions);
+    write_global_optima_to_pointer(this->cliqueTree, glob_optima_solutions);
     std::vector<std::vector<int>> glob_optima_vector;
 
     for(int i = 0; i < numGlobOpt; i++) {
@@ -91,15 +106,11 @@ std::vector<std::vector<int>> getGlobalOptima(CliqueTree* cliqueTree, uintptr_t 
 }
 
 
-double evaluate (const std::vector<int> &x) {
-    return 1.0;
-}
-
 // TODO: Maybe use std::set to find whether the global optima vector/set contains the given solution much faster. 
 //   Note that it first must be close to the optimal value, however there might still be a lot of global optima.
-bool isGlobalOptimum(double globOptimaScore, const std::vector<std::vector<int>> &globOptimaVector, const std::vector<int> &x, double score) {
+bool CliqueTreeC::isGlobalOptimum(const std::vector<int> &x, double score) {
 
-    return (score == globOptimaScore || (
-        std::abs(score - globOptimaScore) < FITNESS_EPSILON && std::find(globOptimaVector.begin(), globOptimaVector.end(), x) != globOptimaVector.end()
+    return (score == this->globOptScore || (
+        std::abs(score - this->globOptScore) < FITNESS_EPSILON && std::find(globOptimaVector.begin(), globOptimaVector.end(), x) != globOptimaVector.end()
     ));
 }
