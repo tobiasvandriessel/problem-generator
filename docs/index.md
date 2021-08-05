@@ -49,7 +49,7 @@ To use problem_generator in your project, you can simply add problem_generator i
 
 ```toml
 [dependencies]
-problem_generator = "^0.1.0"
+problem_generator = "^0.1.3"
 ```
 
-The library documentation can be found on [doc.rs](https://docs.rs/problem_generator/0.1.0).
+The library documentation can be found on [doc.rs](https://docs.rs/problem_generator/0.1.3).
