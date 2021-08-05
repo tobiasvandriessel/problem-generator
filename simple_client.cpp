@@ -74,13 +74,13 @@ double CliqueTreeC::evaluate(const std::vector<int> &x) {
 
 std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length) {
 
-    int** glob_optima_solutions = new int*[numGlobOpt];
+    int** globOptimaSolutions = new int*[numGlobOpt];
     for(int i = 0; i < numGlobOpt; i++) {
-        glob_optima_solutions[i] = new int[length];
+        globOptimaSolutions[i] = new int[length];
     }
 
-    write_global_optima_to_pointer(this->cliqueTree, glob_optima_solutions);
-    std::set<std::vector<int>> glob_optima_vector;
+    write_global_optima_to_pointer(this->cliqueTree, globOptimaSolutions);
+    std::set<std::vector<int>> globOptimaVector;
 
     for(int i = 0; i < numGlobOpt; i++) {
         // cout << "global optima " << i << ": " << endl;
@@ -89,12 +89,12 @@ std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, ui
         // }
         // cout << endl;
 
-        std::vector<int> glob_opt(glob_optima_solutions[i], glob_optima_solutions[i] + length);
+        std::vector<int> glob_opt(globOptimaSolutions[i], globOptimaSolutions[i] + length);
         // for(int j = 0; j < length; j++) {
         //     cout << glob_opt[j];
         // }
         // cout << endl;
-        auto result = glob_optima_vector.insert(glob_opt);
+        auto result = globOptimaVector.insert(glob_opt);
         if (!result.second) {
             throw std::logic_error("Global optima are not unique...");
         }
@@ -102,11 +102,11 @@ std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, ui
     }
 
     for(int i = 0; i < numGlobOpt; i++) {
-        delete [] glob_optima_solutions[i];
+        delete [] globOptimaSolutions[i];
     }
-    delete [] glob_optima_solutions;
+    delete [] globOptimaSolutions;
 
-    return glob_optima_vector;
+    return globOptimaVector;
 }
 
 
