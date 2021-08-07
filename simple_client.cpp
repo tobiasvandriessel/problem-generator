@@ -15,7 +15,7 @@ class CliqueTreeC {
         CliqueTree* cliqueTree;
 
         double globOptScore;
-        std::set<std::vector<int>> globOptimaVector;
+        std::set<std::vector<int>> globOptimaSet;
 
         std::set<std::vector<int>> getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length);
         bool isGlobalOptimum(const std::vector<int> &x, double score);
@@ -31,21 +31,23 @@ class CliqueTreeC {
 
 int main() {
     InputParameters inputParameters = InputParameters();
-    inputParameters.m = 9;
+    inputParameters.m = 5;
     inputParameters.k = 3;
-    inputParameters.o = 2;
+    inputParameters.o = 1;
     inputParameters.b = 2;
 
     CodomainFunction codomainFunction = CodomainFunction();
     codomainFunction.tag = CodomainFunction::Tag::DeceptiveTrap; 
 
-    const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
 
     CliqueTreeC cliqueTree(inputParameters, codomainFunction);
 
+
+    const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
     double fitness = cliqueTree.evaluate(x);
 
     // cout << "Fitness: " << fitness << endl;
+    // cout << "Global optimum found: " << cliqueTree.globalOptimumFound << endl;
 
 }
 
@@ -58,7 +60,7 @@ CliqueTreeC::CliqueTreeC(InputParameters inputParameters, CodomainFunction codom
     uintptr_t num_glob_opt = get_number_of_global_optima(this->cliqueTree);
     this->globOptScore = get_score_of_global_optima(this->cliqueTree);
 
-    this->globOptimaVector = this->getGlobalOptima(num_glob_opt, length);
+    this->globOptimaSet = this->getGlobalOptima(num_glob_opt, length);
     this->globalOptimumFound = false;
 }
 
@@ -68,8 +70,8 @@ CliqueTreeC::~CliqueTreeC(){
 
 double CliqueTreeC::evaluate(const std::vector<int> &x) {
     double fitness = evaluate_solution(this->cliqueTree, x.data(), x.size());
-    bool globalOptimumFound = this->isGlobalOptimum(x, fitness);
-    return globalOptimumFound;
+    this->globalOptimumFound = this->isGlobalOptimum(x, fitness);
+    return fitness;
 }
 
 std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, uintptr_t length) {
@@ -80,7 +82,7 @@ std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, ui
     }
 
     write_global_optima_to_pointer(this->cliqueTree, globOptimaSolutions);
-    std::set<std::vector<int>> globOptimaVector;
+    std::set<std::vector<int>> globOptimaSet;
 
     for(int i = 0; i < numGlobOpt; i++) {
         // cout << "global optima " << i << ": " << endl;
@@ -94,7 +96,7 @@ std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, ui
         //     cout << glob_opt[j];
         // }
         // cout << endl;
-        auto result = globOptimaVector.insert(glob_opt);
+        auto result = globOptimaSet.insert(glob_opt);
         if (!result.second) {
             throw std::logic_error("Global optima are not unique...");
         }
@@ -106,13 +108,13 @@ std::set<std::vector<int>> CliqueTreeC::getGlobalOptima(uintptr_t numGlobOpt, ui
     }
     delete [] globOptimaSolutions;
 
-    return globOptimaVector;
+    return globOptimaSet;
 }
 
 
 bool CliqueTreeC::isGlobalOptimum(const std::vector<int> &x, double score) {
 
     return (score == this->globOptScore || (
-        std::abs(score - this->globOptScore) < FITNESS_EPSILON && this->globOptimaVector.find(x) != this->globOptimaVector.end() 
+        std::abs(score - this->globOptScore) < FITNESS_EPSILON && this->globOptimaSet.find(x) != this->globOptimaSet.end() 
     ));
 }
