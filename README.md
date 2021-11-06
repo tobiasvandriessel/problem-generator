@@ -25,11 +25,13 @@ We introduce a publicly available benchmark generator for Tree Decomposition (TD
 ## Table of Contents
 - [Workshop paper Abstract](#workshop-paper-abstract)
 - [Quick Start](#quick-start)
-  - [Example output problem](#example-output-problem)
-  - [Binary](#binary)
-  - [Library](#library)
+	- [Example output problem](#example-output-problem)
+	- [Binary](#binary)
+	- [Library](#library)
+		- [Rust](#rust)
+		- [C++](#c)
 - [Installation](#installation)
-  - [Binary](#binary-1)
+	- [Binary](#binary-1)
 - [Usage/Documentation](#usagedocumentation)
 - [References](#references)
 - [License](#license)
@@ -60,7 +62,9 @@ deceptive-trap
 
 Then enter ```problem_generator configuration_folder example``` to generate 1 problem per configuration, which can be found in the `problems` folder. The accompanying codomain values can be found in the `codomain_files` folder.
 
-### Library
+### Library 
+
+#### Rust
 
 To use problem_generator in your project, you can simply add problem_generator into your ```cargo.toml```: 
 
@@ -70,6 +74,11 @@ problem_generator = "^0.1.3"
 ```
 
 The library documentation can be found on [doc.rs](https://docs.rs/problem_generator/0.1.3).
+
+#### C++
+
+Current WIP is creating a wrapper in C++ for this library, for which most of the work is done and can be found in the [cpp-integration branch](https://github.com/tobiasvandriessel/problem-generator/tree/cpp_integration). This will be used by the [IOHprofiler/IOHexperimenter](https://github.com/IOHprofiler/IOHexperimenter) benchmark framework to integrate the TD Mk Landscape benchmark generator. Note that the C++ wrapper could be adjusted fairly easily into a C wrapper. 
+
 
 ## Installation
 
