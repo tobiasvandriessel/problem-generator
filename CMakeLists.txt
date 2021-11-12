@@ -12,11 +12,13 @@ set(PROBLEM_GENERATOR_SO "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_DIR}/libproblem_g
 
 add_custom_target(problem_generator ALL
     COMMENT "Compiling problem generator module"
-    COMMAND CARGO_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} ${CARGO_CMD} 
+    COMMAND CARGO_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} ${CARGO_CMD}
     COMMAND cp ${PROBLEM_GENERATOR_SO} ${CMAKE_CURRENT_BINARY_DIR}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(problem_generator PROPERTIES LOCATION ${CMAKE_CURRENT_BINARY_DIR})
 
-#add_test(NAME problem_generator_test 
+add_library(problem_generator_lib SHARED IMPORTED GLOBAL)
+set_property(TARGET problem_generator_lib PROPERTY IMPORTED_LOCATION ${PROBLEM_GENERATOR_SO})
+#add_test(NAME problem_generator_test
 #    COMMAND cargo test
 #    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
