@@ -2,6 +2,7 @@
 Module for functions related to reading and writing to files, mainly for reading stored clique trees
 */
 
+use rand::rngs::StdRng;
 use structopt::StructOpt;
 // use itertools::Itertools;
 use itertools::izip;
@@ -20,6 +21,7 @@ use super::codomain_subclasses::CodomainFunction;
 pub fn get_clique_tree_from_codomain_file(
     codomain_file_path: &Path,
     file_has_codomain_function: bool,
+    rng: &mut StdRng
 ) -> Result<CliqueTree, Box<dyn Error>> {
     let contents = fs::read_to_string(&codomain_file_path)?;
     let mut content_iterator = contents.lines();
@@ -47,7 +49,7 @@ pub fn get_clique_tree_from_codomain_file(
     //print!("For file {:?} ", file_path);
 
     //Generate a clique tree that adheres to the given input parameters. The clique tree also calculates the global optimum.
-    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain);
+    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain, rng);
 
     //and return result
     Ok(clique_tree)
@@ -57,6 +59,7 @@ pub fn get_clique_tree_from_codomain_file(
 pub fn get_clique_trees_paths_from_codomain_folder(
     folder_path: &Path,
     files_have_codomain_function: bool,
+    rng: &mut StdRng
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
     Ok(folder_path
         .read_dir()?
@@ -64,7 +67,7 @@ pub fn get_clique_trees_paths_from_codomain_folder(
         .into_iter()
         .map(|path| {
             (
-                get_clique_tree_from_codomain_file(&path, files_have_codomain_function).unwrap(),
+                get_clique_tree_from_codomain_file(&path, files_have_codomain_function, rng).unwrap(),
                 path,
             )
         })

@@ -2,8 +2,8 @@
 Module for codomain generation, reading, and writing.
 */
 
-use indicatif::ParallelProgressIterator;
-use rayon::iter::{IntoParallelIterator, ParallelIterator};
+use rand::{SeedableRng};
+use rand::rngs::StdRng;
 use structopt::StructOpt;
 
 use super::io::get_output_folder_path_from_configuration_file;
@@ -42,6 +42,8 @@ enum CodomainCommand {
         ///File to read all the configurations from, for which codomains need to be generated
         #[structopt(parse(from_os_str))]
         folder_paths: Vec<PathBuf>,
+        #[structopt(short = "s", long = "seed")]
+        seed: Option<u64>,
     },
     /// Generate codomain values for configurations specified in a given file
     #[structopt(name = "file")]
@@ -49,6 +51,8 @@ enum CodomainCommand {
         ///File to read all the configurations from, for which codomains need to be generated
         #[structopt(parse(from_os_str))]
         file_path: PathBuf,
+        #[structopt(short = "s", long = "seed")]
+        seed: Option<u64>,
     },
     /// Generate codomain values for the configuration defined by the cli arguments
     #[structopt(name = "instance")]
@@ -67,19 +71,31 @@ enum CodomainCommand {
         /// The subfunction to use for the codomain generation
         #[structopt(subcommand)]
         codomain_function: CodomainFunction,
+        #[structopt(short = "s", long = "seed")]
+        seed: Option<u64>,
     },
 }
 
 ///Run codomain generator from command line options (structopt)
 pub fn run_opt(codomain_opt: CodomainOpt) -> Result<(), Box<dyn Error>> {
     match codomain_opt.codomain_command {
-        CodomainCommand::Folder { folder_paths } => {
+        CodomainCommand::Folder { folder_paths, seed} => {
+            let mut rng = match seed  {
+                Some(seed) => StdRng::seed_from_u64(seed),
+                None => StdRng::from_entropy(),
+            };
             for folder_path in folder_paths {
-                handle_folder(folder_path)?;
+                handle_folder(folder_path, &mut rng)?;
             }
             Ok(())
         }
-        CodomainCommand::File { file_path } => handle_input_configuration_file(file_path),
+        CodomainCommand::File { file_path, seed } => {
+            let mut rng = match seed  {
+                Some(seed) => StdRng::seed_from_u64(seed),
+                None => StdRng::from_entropy(),
+            };
+            handle_input_configuration_file(file_path, &mut rng)
+        },
         CodomainCommand::Instance {
             m,
             k,
@@ -87,16 +103,21 @@ pub fn run_opt(codomain_opt: CodomainOpt) -> Result<(), Box<dyn Error>> {
             b,
             output_file_path,
             codomain_function,
+            seed,
         } => {
+            let mut rng = match seed  {
+                Some(seed) => StdRng::seed_from_u64(seed),
+                None => StdRng::from_entropy(),
+            };
             let input_parameters = InputParameters::new_from_primitives(m, k, o, b);
-            generate_and_write(&input_parameters, &codomain_function, &output_file_path)?;
+            generate_and_write(&input_parameters, &codomain_function, &output_file_path, &mut rng)?;
             Ok(())
         }
     }
 }
 
 ///Handle codomain generation for a folder: for every entry in it that is not a folder, pass the file to handle_input_file
-fn handle_folder(folder_path: PathBuf) -> Result<(), Box<dyn Error>> {
+fn handle_folder(folder_path: PathBuf, rng: &mut StdRng) -> Result<(), Box<dyn Error>> {
     //First we remove all folders that are not named codomain_generation
     folder_path
         .read_dir()?
@@ -118,8 +139,8 @@ fn handle_folder(folder_path: PathBuf) -> Result<(), Box<dyn Error>> {
         .collect();
 
     //And handle each of them
-    file_entries.into_par_iter().progress().for_each(|path| {
-        handle_input_configuration_file(path).unwrap();
+    file_entries.into_iter().for_each(|path| {
+        handle_input_configuration_file(path, rng).unwrap();
     });
 
     Ok(())
@@ -129,6 +150,7 @@ fn handle_folder(folder_path: PathBuf) -> Result<(), Box<dyn Error>> {
 /// getting the output directory path from the filename and generating the codomain 25 times for all input parameters.
 fn handle_input_configuration_file(
     input_configuration_file_path: PathBuf,
+    rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     let experiment_parameters = ConfigurationParameters::from_file(&input_configuration_file_path)?;
 
@@ -156,7 +178,7 @@ fn handle_input_configuration_file(
             output_file_path.push(output_file_name);
             //println!("constructed output file path: {:?}", output_file_path);
 
-            generate_and_write(&input_parameters, &codomain_function, &output_file_path)?;
+            generate_and_write(&input_parameters, &codomain_function, &output_file_path, rng)?;
         }
     }
 
@@ -170,6 +192,7 @@ pub fn handle_input_configuration_file_return_hashmap(
     input_configuration_file_path: &Path,
     output_codomain_folder: Option<&Path>,
     number_problems: u32,
+    rng: &mut StdRng
 ) -> Result<HashMap<InputParameters, Vec<Vec<Vec<f64>>>>, Box<dyn Error>> {
     let mut input_parameters_codomain_hashmap = HashMap::new();
     let experiment_parameters = ConfigurationParameters::from_file(input_configuration_file_path)?;
@@ -206,7 +229,7 @@ pub fn handle_input_configuration_file_return_hashmap(
             //println!("constructed output file path: {:?}", output_file_path);
 
             let codomain =
-                generate_write_return(&input_parameters, &codomain_function, &output_file_path)?;
+                generate_write_return(&input_parameters, &codomain_function, &output_file_path, rng)?;
 
             codomains.push(codomain);
         }
@@ -221,12 +244,13 @@ fn generate_and_write(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
     output_file_path: &Path,
+    rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     write_codomain(
         input_parameters,
         codomain_function,
         output_file_path,
-        &generate_codomain(input_parameters, codomain_function),
+        &generate_codomain(input_parameters, codomain_function, rng),
     )?;
     Ok(())
 }
@@ -236,8 +260,9 @@ fn generate_write_return(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
     output_file_path: &Path,
+    rng: &mut StdRng
 ) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
-    let codomain = generate_codomain(input_parameters, codomain_function);
+    let codomain = generate_codomain(input_parameters, codomain_function, rng);
     write_codomain(
         input_parameters,
         codomain_function,
@@ -251,15 +276,16 @@ fn generate_write_return(
 pub fn generate_codomain(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
+    rng: &mut StdRng
 ) -> Vec<Vec<f64>> {
     match codomain_function {
-        CodomainFunction::Random => generate_random(input_parameters),
+        CodomainFunction::Random => generate_random(input_parameters, rng),
         CodomainFunction::Trap => generate_trap(input_parameters, 2.5),
-        CodomainFunction::DeceptiveTrap => generate_trap_general(input_parameters), // generate_trap(input_parameters, 1.0),
-        CodomainFunction::NKq { q } => generate_nk_q(input_parameters, *q),
-        CodomainFunction::NKp { p } => generate_nk_p(input_parameters, *p),
+        CodomainFunction::DeceptiveTrap => generate_trap_general(input_parameters, rng), // generate_trap(input_parameters, 1.0),
+        CodomainFunction::NKq { q } => generate_nk_q(input_parameters, *q, rng),
+        CodomainFunction::NKp { p } => generate_nk_p(input_parameters, *p, rng),
         CodomainFunction::RandomDeceptiveTrap { p_deceptive } => {
-            generate_random_trap(input_parameters, *p_deceptive)
+            generate_random_trap(input_parameters, *p_deceptive, rng)
         }
         CodomainFunction::Unknown => panic!("We can't generate codomain for unknown codomain"),
     }

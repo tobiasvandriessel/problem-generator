@@ -2,6 +2,7 @@
 Module for the 1) Clique Tree construction and global optimum calculation, 2) and the struct to contain solutions.
 */
 
+use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 
@@ -103,9 +104,10 @@ impl CliqueTree {
         input_parameters: InputParameters,
         codomain_function: CodomainFunction,
         codomain_values: Vec<Vec<f64>>,
+        rng: &mut StdRng,
     ) -> CliqueTree {
         //Create a new clique tree (as its cliques and separators)
-        let (cliques, separators) = CliqueTree::construct(&input_parameters);
+        let (cliques, separators) = CliqueTree::construct(&input_parameters, rng);
 
         //Then calculate the global optimum (optima) for the clique tree
         let global_opt_tuples = CliqueTree::calculate_global_optima(
@@ -634,8 +636,7 @@ impl CliqueTree {
     }
 
     ///Construct the clique tree, using the input paramters and the codomain values. It returns a tuple (cliques, separators)
-    pub fn construct(input_parameters: &InputParameters) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
-        let mut rng = rand::thread_rng();
+    pub fn construct(input_parameters: &InputParameters, rng: &mut StdRng) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
         let mut cliques: Vec<Vec<u32>> = Vec::with_capacity(input_parameters.m as usize);
         let mut separators: Vec<Vec<u32>> = Vec::with_capacity(input_parameters.m as usize);
 
@@ -645,7 +646,7 @@ impl CliqueTree {
             + input_parameters.k))
             .collect();
 
-        indices.shuffle(&mut rng);
+        indices.shuffle(rng);
         debug!("{:?}", indices);
 
         //Initialize clique 0, C0, by  just taking the first k variable indices from the list.
@@ -688,7 +689,7 @@ impl CliqueTree {
                 //Choose o random variable indices from Ci
                 //Here, we first clone Ci, shuffle it, and push the first o variable indices to the separator.
                 let mut clique_copy = cliques[i as usize].clone();
-                clique_copy.shuffle(&mut rng);
+                clique_copy.shuffle(rng);
 
                 let mut new_separator: Vec<u32> = Vec::with_capacity(input_parameters.o as usize);
                 for k in 0..input_parameters.o {
