@@ -2,7 +2,6 @@
 Module to generate problems (TD Mk Landscapes) using passed codomain, read these problems and write them (using (de)serialization ).
 */
 
-use rand::{SeedableRng};
 use rand::rngs::StdRng;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
@@ -21,6 +20,7 @@ use super::{
     clique_tree::{CliqueTree, InputParameters},
     codomain::{handle_input_configuration_file_return_hashmap, read_codomain},
     io::{get_clique_tree_from_codomain_file, get_clique_trees_paths_from_codomain_folder},
+    configuration::{get_rng}
 };
 
 use super::configuration::ConfigurationParameters;
@@ -90,13 +90,6 @@ enum ProblemCommand {
         #[structopt(default_value = "1", short = "n")]
         number_of_problems_to_generate: u32,
     },
-}
-
-pub fn get_rng(seed: Option<u64>) -> StdRng {
-    match seed {
-        Some(seed) => StdRng::seed_from_u64(seed),
-        None => StdRng::from_entropy(),
-    }
 }
 
 ///Run codomain generator from command line options (structopt)

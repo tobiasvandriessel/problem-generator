@@ -2,7 +2,6 @@
 Module for codomain generation, reading, and writing.
 */
 
-use rand::{SeedableRng};
 use rand::rngs::StdRng;
 use structopt::StructOpt;
 
@@ -10,7 +9,7 @@ use super::io::get_output_folder_path_from_configuration_file;
 
 use super::clique_tree::InputParameters;
 use super::codomain_subclasses::*;
-use super::configuration::ConfigurationParameters;
+use super::configuration::{ConfigurationParameters, get_rng};
 
 use std::collections::HashMap;
 use std::fmt::Write as fmtWrite;
@@ -32,6 +31,8 @@ use std::{
 pub struct CodomainOpt {
     #[structopt(subcommand)]
     codomain_command: CodomainCommand,
+    #[structopt(short = "s", long = "seed")]
+    seed: Option<u64>,
 }
 
 #[derive(StructOpt, Debug)]
@@ -42,8 +43,6 @@ enum CodomainCommand {
         ///File to read all the configurations from, for which codomains need to be generated
         #[structopt(parse(from_os_str))]
         folder_paths: Vec<PathBuf>,
-        #[structopt(short = "s", long = "seed")]
-        seed: Option<u64>,
     },
     /// Generate codomain values for configurations specified in a given file
     #[structopt(name = "file")]
@@ -51,8 +50,6 @@ enum CodomainCommand {
         ///File to read all the configurations from, for which codomains need to be generated
         #[structopt(parse(from_os_str))]
         file_path: PathBuf,
-        #[structopt(short = "s", long = "seed")]
-        seed: Option<u64>,
     },
     /// Generate codomain values for the configuration defined by the cli arguments
     #[structopt(name = "instance")]
@@ -71,47 +68,39 @@ enum CodomainCommand {
         /// The subfunction to use for the codomain generation
         #[structopt(subcommand)]
         codomain_function: CodomainFunction,
-        #[structopt(short = "s", long = "seed")]
-        seed: Option<u64>,
     },
 }
 
 ///Run codomain generator from command line options (structopt)
 pub fn run_opt(codomain_opt: CodomainOpt) -> Result<(), Box<dyn Error>> {
-    match codomain_opt.codomain_command {
-        CodomainCommand::Folder { folder_paths, seed} => {
-            let mut rng = match seed  {
-                Some(seed) => StdRng::seed_from_u64(seed),
-                None => StdRng::from_entropy(),
-            };
-            for folder_path in folder_paths {
-                handle_folder(folder_path, &mut rng)?;
+    match codomain_opt {
+        CodomainOpt { codomain_command, seed } => {
+            match codomain_command {
+                CodomainCommand::Folder { folder_paths} => {
+                    let mut rng = get_rng(seed);
+                    for folder_path in folder_paths {
+                        handle_folder(folder_path, &mut rng)?;
+                    }
+                    Ok(())
+                }
+                CodomainCommand::File { file_path } => {
+                    let mut rng = get_rng(seed);
+                    handle_input_configuration_file(file_path, &mut rng)
+                },
+                CodomainCommand::Instance {
+                    m,
+                    k,
+                    o,
+                    b,
+                    output_file_path,
+                    codomain_function
+                } => {
+                    let mut rng = get_rng(seed);
+                    let input_parameters = InputParameters::new_from_primitives(m, k, o, b);
+                    generate_and_write(&input_parameters, &codomain_function, &output_file_path, &mut rng)?;
+                    Ok(())
+                }
             }
-            Ok(())
-        }
-        CodomainCommand::File { file_path, seed } => {
-            let mut rng = match seed  {
-                Some(seed) => StdRng::seed_from_u64(seed),
-                None => StdRng::from_entropy(),
-            };
-            handle_input_configuration_file(file_path, &mut rng)
-        },
-        CodomainCommand::Instance {
-            m,
-            k,
-            o,
-            b,
-            output_file_path,
-            codomain_function,
-            seed,
-        } => {
-            let mut rng = match seed  {
-                Some(seed) => StdRng::seed_from_u64(seed),
-                None => StdRng::from_entropy(),
-            };
-            let input_parameters = InputParameters::new_from_primitives(m, k, o, b);
-            generate_and_write(&input_parameters, &codomain_function, &output_file_path, &mut rng)?;
-            Ok(())
         }
     }
 }
