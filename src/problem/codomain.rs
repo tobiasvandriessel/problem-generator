@@ -2,6 +2,7 @@
 Module for codomain generation, reading, and writing.
 */
 
+use indicatif::ProgressIterator;
 use rand::rngs::StdRng;
 use structopt::StructOpt;
 
@@ -73,34 +74,28 @@ enum CodomainCommand {
 
 ///Run codomain generator from command line options (structopt)
 pub fn run_opt(codomain_opt: CodomainOpt) -> Result<(), Box<dyn Error>> {
-    match codomain_opt {
-        CodomainOpt { codomain_command, seed } => {
-            match codomain_command {
-                CodomainCommand::Folder { folder_paths} => {
-                    let mut rng = get_rng(seed);
-                    for folder_path in folder_paths {
-                        handle_folder(folder_path, &mut rng)?;
-                    }
-                    Ok(())
-                }
-                CodomainCommand::File { file_path } => {
-                    let mut rng = get_rng(seed);
-                    handle_input_configuration_file(file_path, &mut rng)
-                },
-                CodomainCommand::Instance {
-                    m,
-                    k,
-                    o,
-                    b,
-                    output_file_path,
-                    codomain_function
-                } => {
-                    let mut rng = get_rng(seed);
-                    let input_parameters = InputParameters::new_from_primitives(m, k, o, b);
-                    generate_and_write(&input_parameters, &codomain_function, &output_file_path, &mut rng)?;
-                    Ok(())
-                }
+    let mut rng = get_rng(codomain_opt.seed);
+    match codomain_opt.codomain_command {
+        CodomainCommand::Folder { folder_paths} => {
+            for folder_path in folder_paths {
+                handle_folder(folder_path, &mut rng)?;
             }
+            Ok(())
+        }
+        CodomainCommand::File { file_path } => {
+            handle_input_configuration_file(file_path, &mut rng)
+        },
+        CodomainCommand::Instance {
+            m,
+            k,
+            o,
+            b,
+            output_file_path,
+            codomain_function
+        } => {
+            let input_parameters = InputParameters::new_from_primitives(m, k, o, b);
+            generate_and_write(&input_parameters, &codomain_function, &output_file_path, &mut rng)?;
+            Ok(())
         }
     }
 }
@@ -120,15 +115,16 @@ fn handle_folder(folder_path: PathBuf, rng: &mut StdRng) -> Result<(), Box<dyn E
     //Then we read every codomain generation file from the codomain_generation folder
     let mut codomain_generation_folder_path = folder_path;
     codomain_generation_folder_path.push("codomain_generation");
-    let file_entries: Vec<PathBuf> = codomain_generation_folder_path
+    let mut file_entries: Vec<PathBuf> = codomain_generation_folder_path
         .read_dir()?
         .map(|file| file.unwrap())
         .filter(|file| !file.file_type().unwrap().is_dir())
         .map(|file| file.path())
         .collect();
+    file_entries.sort();
 
     //And handle each of them
-    file_entries.into_iter().for_each(|path| {
+    file_entries.into_iter().progress().for_each(|path| {
         handle_input_configuration_file(path, rng).unwrap();
     });
 
@@ -142,7 +138,6 @@ fn handle_input_configuration_file(
     rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     let experiment_parameters = ConfigurationParameters::from_file(&input_configuration_file_path)?;
-
     let codomain_function = experiment_parameters.codomain_function.clone();
     let directory_path_buf = get_output_folder_path_from_configuration_file(
         &input_configuration_file_path,

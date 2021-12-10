@@ -94,62 +94,55 @@ enum ProblemCommand {
 
 ///Run codomain generator from command line options (structopt)
 pub fn run_opt(problem_opt: ProblemOpt) -> Result<(), Box<dyn Error>> {
-    match problem_opt {
-        ProblemOpt { problem_command, seed } => {
-            match problem_command {
-                ProblemCommand::CodomainFolder {
-                    folder_paths,
-                    generated,
-                } => {
-                    let mut rng = get_rng(seed);
-                    for folder_path in folder_paths {
-                        generate_problems_from_codomain_folder(&folder_path, generated, &mut rng)?;
-                    }
-                    Ok(())
-                }
-                ProblemCommand::ConfigurationFolder {
-                    folder_paths,
-                    number_of_problems_to_generate,
-                } => {
-                    let mut rng = get_rng(seed);
-                    for folder_path in folder_paths {
-                        generate_codomain_and_problem_from_folder(
-                            &folder_path,
-                            number_of_problems_to_generate,
-                            &mut rng,
-                        )?;
-                    }
-                    Ok(())
-                }
-                ProblemCommand::CodomainFile {
-                    input_codomain_file_path,
-                    output_problem_file_path,
-                    generated,
-                } => {
-                    let mut rng = get_rng(seed);
-                    generate_problem_from_codomain_file(
-                        &input_codomain_file_path,
-                        &output_problem_file_path,
-                        generated,
-                        &mut rng
-                    )
-                },
-                ProblemCommand::ConfigurationFile {
-                    input_configuration_file_path,
-                    output_codomain_folder_path,
-                    output_problem_folder_path,
-                    number_of_problems_to_generate,
-                } => {
-                    let mut rng = get_rng(seed);
-                    generate_codomain_and_problem(
-                        &input_configuration_file_path,
-                        Some(&output_codomain_folder_path),
-                        Some(&output_problem_folder_path),
-                        number_of_problems_to_generate,
-                        &mut rng
-                    )
-                }
+    let mut rng = get_rng(problem_opt.seed);
+    match problem_opt.problem_command {
+        ProblemCommand::CodomainFolder {
+            folder_paths,
+            generated,
+        } => {
+            for folder_path in folder_paths {
+                generate_problems_from_codomain_folder(&folder_path, generated, &mut rng)?;
             }
+            Ok(())
+        }
+        ProblemCommand::ConfigurationFolder {
+            folder_paths,
+            number_of_problems_to_generate,
+        } => {
+            for folder_path in folder_paths {
+                generate_codomain_and_problem_from_folder(
+                    &folder_path,
+                    number_of_problems_to_generate,
+                    &mut rng,
+                )?;
+            }
+            Ok(())
+        }
+        ProblemCommand::CodomainFile {
+            input_codomain_file_path,
+            output_problem_file_path,
+            generated,
+        } => {
+            generate_problem_from_codomain_file(
+                &input_codomain_file_path,
+                &output_problem_file_path,
+                generated,
+                &mut rng
+            )
+        },
+        ProblemCommand::ConfigurationFile {
+            input_configuration_file_path,
+            output_codomain_folder_path,
+            output_problem_folder_path,
+            number_of_problems_to_generate,
+        } => {
+            generate_codomain_and_problem(
+                &input_configuration_file_path,
+                Some(&output_codomain_folder_path),
+                Some(&output_problem_folder_path),
+                number_of_problems_to_generate,
+                &mut rng
+            )
         }
     }
 }
