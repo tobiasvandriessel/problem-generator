@@ -2,6 +2,7 @@
 Module for functions related to reading and writing to files, mainly for reading stored clique trees
 */
 
+use itertools::Itertools;
 use rand::rngs::StdRng;
 use structopt::StructOpt;
 // use itertools::Itertools;
@@ -64,7 +65,7 @@ pub fn get_clique_trees_paths_from_codomain_folder(
     Ok(folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
-        .into_iter()
+        .sorted()
         .map(|path| {
             (
                 get_clique_tree_from_codomain_file(&path, files_have_codomain_function, rng).unwrap(),

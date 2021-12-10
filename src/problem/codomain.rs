@@ -5,6 +5,7 @@ Module for codomain generation, reading, and writing.
 use indicatif::ProgressIterator;
 use rand::rngs::StdRng;
 use structopt::StructOpt;
+use itertools::Itertools;
 
 use super::io::get_output_folder_path_from_configuration_file;
 
@@ -115,13 +116,13 @@ fn handle_folder(folder_path: PathBuf, rng: &mut StdRng) -> Result<(), Box<dyn E
     //Then we read every codomain generation file from the codomain_generation folder
     let mut codomain_generation_folder_path = folder_path;
     codomain_generation_folder_path.push("codomain_generation");
-    let mut file_entries: Vec<PathBuf> = codomain_generation_folder_path
+    let file_entries: Vec<PathBuf> = codomain_generation_folder_path
         .read_dir()?
         .map(|file| file.unwrap())
         .filter(|file| !file.file_type().unwrap().is_dir())
         .map(|file| file.path())
+        .sorted()
         .collect();
-    file_entries.sort();
 
     //And handle each of them
     file_entries.into_iter().progress().for_each(|path| {

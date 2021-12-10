@@ -2,6 +2,7 @@
 Module to generate problems (TD Mk Landscapes) using passed codomain, read these problems and write them (using (de)serialization ).
 */
 
+use itertools::Itertools;
 use rand::rngs::StdRng;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
@@ -184,6 +185,7 @@ pub fn generate_problems_from_codomain_folder(
     let folder_entries: Vec<PathBuf> = codomain_folder_path
         .read_dir()?
         .map(|folder| folder.unwrap().path())
+        .sorted()
         .collect();
 
     //For each folder f,
@@ -227,6 +229,7 @@ pub fn generate_codomain_and_problem_from_folder(
     let file_entries: Vec<PathBuf> = problem_generation_path
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
 
     // generate all codomain and problem files and write them to the codomain_files and problems folders
