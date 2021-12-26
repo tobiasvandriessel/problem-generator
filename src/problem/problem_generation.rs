@@ -348,25 +348,23 @@ pub fn read_clique_trees_paths_from_folders(
     generated: bool,
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
     //Get all codomain files
-    let mut codomain_file_entries: Vec<PathBuf> = codomain_folder_path
+    let codomain_file_entries: Vec<PathBuf> = codomain_folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
     //Get all problem files
-    let mut problem_file_entries: Vec<PathBuf> = problem_folder_path
+    let problem_file_entries: Vec<PathBuf> = problem_folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-
-    //Sort these file entries
-    codomain_file_entries.sort();
-    problem_file_entries.sort();
 
     assert_eq!(codomain_file_entries.len(), problem_file_entries.len());
 
     let mut result_vec = Vec::new();
 
-    //zip the codomains and problems, and read the clique tree from the codomain and problem files.
+    //zip the (sorted) codomains and problems, and read the clique tree from the codomain and problem files.
     for (codomain_file_entry, problem_file_entry) in codomain_file_entries
         .into_iter()
         .zip(problem_file_entries.into_iter())

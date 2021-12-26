@@ -104,23 +104,22 @@ pub fn get_folders_file_triples(
     problem_files_folder.push("problems");
 
     //And read all files/folders inside these folders
-    let mut file_entries: Vec<PathBuf> = problem_generation_folder
+    //Sort these, so that we can pass the files together without searching for the accompanying folder or file
+    let file_entries: Vec<PathBuf> = problem_generation_folder
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-    let mut codomain_folder_entries: Vec<PathBuf> = codomain_files_folder
+    let codomain_folder_entries: Vec<PathBuf> = codomain_files_folder
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-    let mut problem_folder_entries: Vec<PathBuf> = problem_files_folder
+    let problem_folder_entries: Vec<PathBuf> = problem_files_folder
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-
-    //Sort, so that we can pass the files together without searching for the accompanying folder or file
-    file_entries.sort();
-    codomain_folder_entries.sort();
-    problem_folder_entries.sort();
 
     assert_eq!(file_entries.len(), codomain_folder_entries.len());
     assert_eq!(file_entries.len(), problem_folder_entries.len());
