@@ -33,13 +33,13 @@ use super::configuration::ConfigurationParameters;
 )]
 pub struct ProblemOpt {
     #[structopt(subcommand)]
-    problem_command: ProblemCommand,
+    pub problem_command: ProblemCommand,
     #[structopt(short = "s", long = "seed")]
-    seed: Option<u64>,
+    pub seed: Option<u64>,
 }
 
 #[derive(StructOpt, Debug)]
-enum ProblemCommand {
+pub enum ProblemCommand {
     /// Generate problems for configurations specified in a given directory that contains a directory 'codomain_files'
     ///  with codomain files that specify both the topology and codomain
     #[structopt(name = "codomain_folder")]

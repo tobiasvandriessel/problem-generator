@@ -32,13 +32,13 @@ use std::{
 )]
 pub struct CodomainOpt {
     #[structopt(subcommand)]
-    codomain_command: CodomainCommand,
+    pub codomain_command: CodomainCommand,
     #[structopt(short = "s", long = "seed")]
-    seed: Option<u64>,
+    pub seed: Option<u64>,
 }
 
 #[derive(StructOpt, Debug)]
-enum CodomainCommand {
+pub enum CodomainCommand {
     /// Generate codomain values for configurations specified in a given file
     #[structopt(name = "folder")]
     Folder {
