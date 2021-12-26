@@ -2,6 +2,8 @@
 Module for functions related to reading and writing to files, mainly for reading stored clique trees
 */
 
+use itertools::Itertools;
+use rand::rngs::StdRng;
 use structopt::StructOpt;
 // use itertools::Itertools;
 use itertools::izip;
@@ -20,6 +22,7 @@ use super::codomain_subclasses::CodomainFunction;
 pub fn get_clique_tree_from_codomain_file(
     codomain_file_path: &Path,
     file_has_codomain_function: bool,
+    rng: &mut StdRng
 ) -> Result<CliqueTree, Box<dyn Error>> {
     let contents = fs::read_to_string(&codomain_file_path)?;
     let mut content_iterator = contents.lines();
@@ -47,7 +50,7 @@ pub fn get_clique_tree_from_codomain_file(
     //print!("For file {:?} ", file_path);
 
     //Generate a clique tree that adheres to the given input parameters. The clique tree also calculates the global optimum.
-    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain);
+    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain, rng);
 
     //and return result
     Ok(clique_tree)
@@ -57,14 +60,15 @@ pub fn get_clique_tree_from_codomain_file(
 pub fn get_clique_trees_paths_from_codomain_folder(
     folder_path: &Path,
     files_have_codomain_function: bool,
+    rng: &mut StdRng
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
     Ok(folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
-        .into_iter()
+        .sorted()
         .map(|path| {
             (
-                get_clique_tree_from_codomain_file(&path, files_have_codomain_function).unwrap(),
+                get_clique_tree_from_codomain_file(&path, files_have_codomain_function, rng).unwrap(),
                 path,
             )
         })
@@ -100,23 +104,22 @@ pub fn get_folders_file_triples(
     problem_files_folder.push("problems");
 
     //And read all files/folders inside these folders
-    let mut file_entries: Vec<PathBuf> = problem_generation_folder
+    //Sort these, so that we can pass the files together without searching for the accompanying folder or file
+    let file_entries: Vec<PathBuf> = problem_generation_folder
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-    let mut codomain_folder_entries: Vec<PathBuf> = codomain_files_folder
+    let codomain_folder_entries: Vec<PathBuf> = codomain_files_folder
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-    let mut problem_folder_entries: Vec<PathBuf> = problem_files_folder
+    let problem_folder_entries: Vec<PathBuf> = problem_files_folder
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-
-    //Sort, so that we can pass the files together without searching for the accompanying folder or file
-    file_entries.sort();
-    codomain_folder_entries.sort();
-    problem_folder_entries.sort();
 
     assert_eq!(file_entries.len(), codomain_folder_entries.len());
     assert_eq!(file_entries.len(), problem_folder_entries.len());
