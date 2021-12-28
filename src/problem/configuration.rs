@@ -3,6 +3,8 @@ Module for reading the configuration ranges (and iterating over it)
 */
 
 use structopt::StructOpt;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 use std::{error::Error, path::Path};
 
@@ -220,4 +222,11 @@ fn get_m_for_min_problem_size(min_problem_size: u32, k: u32, o: u32) -> u32 {
 fn get_m_for_max_problem_size(max_problem_size: u32, k: u32, o: u32) -> u32 {
     let a = (max_problem_size + (k - o) - k) as f32 / (k - o) as f32;
     (a.ceil() as u32).max(2)
+}
+
+pub fn get_rng(seed: Option<u64>) -> StdRng {
+    match seed {
+        Some(seed) => StdRng::seed_from_u64(seed),
+        None => StdRng::from_entropy(),
+    }
 }

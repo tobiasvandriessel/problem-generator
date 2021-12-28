@@ -2,6 +2,8 @@
 Module to generate problems (TD Mk Landscapes) using passed codomain, read these problems and write them (using (de)serialization ).
 */
 
+use itertools::Itertools;
+use rand::rngs::StdRng;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
@@ -19,6 +21,7 @@ use super::{
     clique_tree::{CliqueTree, InputParameters},
     codomain::{handle_input_configuration_file_return_hashmap, read_codomain},
     io::{get_clique_tree_from_codomain_file, get_clique_trees_paths_from_codomain_folder},
+    configuration::{get_rng}
 };
 
 use super::configuration::ConfigurationParameters;
@@ -30,11 +33,13 @@ use super::configuration::ConfigurationParameters;
 )]
 pub struct ProblemOpt {
     #[structopt(subcommand)]
-    problem_command: ProblemCommand,
+    pub problem_command: ProblemCommand,
+    #[structopt(short = "s", long = "seed")]
+    pub seed: Option<u64>,
 }
 
 #[derive(StructOpt, Debug)]
-enum ProblemCommand {
+pub enum ProblemCommand {
     /// Generate problems for configurations specified in a given directory that contains a directory 'codomain_files'
     ///  with codomain files that specify both the topology and codomain
     #[structopt(name = "codomain_folder")]
@@ -90,13 +95,14 @@ enum ProblemCommand {
 
 ///Run codomain generator from command line options (structopt)
 pub fn run_opt(problem_opt: ProblemOpt) -> Result<(), Box<dyn Error>> {
+    let mut rng = get_rng(problem_opt.seed);
     match problem_opt.problem_command {
         ProblemCommand::CodomainFolder {
             folder_paths,
             generated,
         } => {
             for folder_path in folder_paths {
-                generate_problems_from_codomain_folder(&folder_path, generated)?;
+                generate_problems_from_codomain_folder(&folder_path, generated, &mut rng)?;
             }
             Ok(())
         }
@@ -108,6 +114,7 @@ pub fn run_opt(problem_opt: ProblemOpt) -> Result<(), Box<dyn Error>> {
                 generate_codomain_and_problem_from_folder(
                     &folder_path,
                     number_of_problems_to_generate,
+                    &mut rng,
                 )?;
             }
             Ok(())
@@ -116,22 +123,28 @@ pub fn run_opt(problem_opt: ProblemOpt) -> Result<(), Box<dyn Error>> {
             input_codomain_file_path,
             output_problem_file_path,
             generated,
-        } => generate_problem_from_codomain_file(
-            &input_codomain_file_path,
-            &output_problem_file_path,
-            generated,
-        ),
+        } => {
+            generate_problem_from_codomain_file(
+                &input_codomain_file_path,
+                &output_problem_file_path,
+                generated,
+                &mut rng
+            )
+        },
         ProblemCommand::ConfigurationFile {
             input_configuration_file_path,
             output_codomain_folder_path,
             output_problem_folder_path,
             number_of_problems_to_generate,
-        } => generate_codomain_and_problem(
-            &input_configuration_file_path,
-            Some(&output_codomain_folder_path),
-            Some(&output_problem_folder_path),
-            number_of_problems_to_generate,
-        ),
+        } => {
+            generate_codomain_and_problem(
+                &input_configuration_file_path,
+                Some(&output_codomain_folder_path),
+                Some(&output_problem_folder_path),
+                number_of_problems_to_generate,
+                &mut rng
+            )
+        }
     }
 }
 
@@ -161,6 +174,7 @@ impl Problem {
 pub fn generate_problems_from_codomain_folder(
     parent_folder_path: &Path,
     generated: bool,
+    rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     let mut codomain_folder_path = PathBuf::from(parent_folder_path);
     codomain_folder_path.push("codomain_files");
@@ -171,6 +185,7 @@ pub fn generate_problems_from_codomain_folder(
     let folder_entries: Vec<PathBuf> = codomain_folder_path
         .read_dir()?
         .map(|folder| folder.unwrap().path())
+        .sorted()
         .collect();
 
     //For each folder f,
@@ -185,7 +200,7 @@ pub fn generate_problems_from_codomain_folder(
         std::fs::create_dir_all(&output_folder_path)?;
 
         //And generate problems / clique trees for all codomain files in the codomain folder f
-        let clique_trees_paths = get_clique_trees_paths_from_codomain_folder(&folder, generated)?;
+        let clique_trees_paths = get_clique_trees_paths_from_codomain_folder(&folder, generated, rng)?;
         for (clique_tree, path_buf) in clique_trees_paths {
             let mut output_path = output_folder_path.clone();
             output_path.push(
@@ -204,6 +219,7 @@ pub fn generate_problems_from_codomain_folder(
 pub fn generate_codomain_and_problem_from_folder(
     input_folder_path: &Path,
     number_of_problems_to_generate: u32,
+    rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     //Use the input_folder_path to get the problem_generation folder and problems folder paths
     let mut problem_generation_path = PathBuf::from(input_folder_path);
@@ -213,11 +229,12 @@ pub fn generate_codomain_and_problem_from_folder(
     let file_entries: Vec<PathBuf> = problem_generation_path
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
 
     // generate all codomain and problem files and write them to the codomain_files and problems folders
     for file in file_entries {
-        generate_codomain_and_problem(&file, None, None, number_of_problems_to_generate)?;
+        generate_codomain_and_problem(&file, None, None, number_of_problems_to_generate, rng)?;
     }
     Ok(())
 }
@@ -230,12 +247,14 @@ pub fn generate_codomain_and_problem(
     output_codomain_folder_path: Option<&Path>,
     output_problem_folder_path: Option<&Path>,
     number_of_problems_to_generate: u32,
+    rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     //Generate codomain from an input file (path), and insert in a hashmap the 25 generated codomains per input parameter configuration.
     let mut input_parameters_codomain_hashmap = handle_input_configuration_file_return_hashmap(
         input_configuration_file_path,
         output_codomain_folder_path,
         number_of_problems_to_generate,
+        rng
     )?;
 
     //Get the configuration parameters from the input configuration file
@@ -283,6 +302,7 @@ pub fn generate_codomain_and_problem(
                 input_parameters.clone(),
                 codomain_function.clone(),
                 codomain,
+                rng
             );
 
             //Write the problem to disk
@@ -297,9 +317,10 @@ pub fn generate_problem_from_codomain_file(
     codomain_file_path: &Path,
     output_problem_file_path: &Path,
     generated: bool,
+    rng: &mut StdRng
 ) -> Result<(), Box<dyn Error>> {
     //Get the clique tree from the codomain file
-    let clique_tree = get_clique_tree_from_codomain_file(codomain_file_path, generated)?;
+    let clique_tree = get_clique_tree_from_codomain_file(codomain_file_path, generated, rng)?;
     //Write the problem to file
     write_problem_to_file(&clique_tree, output_problem_file_path)
 }
@@ -327,25 +348,23 @@ pub fn read_clique_trees_paths_from_folders(
     generated: bool,
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
     //Get all codomain files
-    let mut codomain_file_entries: Vec<PathBuf> = codomain_folder_path
+    let codomain_file_entries: Vec<PathBuf> = codomain_folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
     //Get all problem files
-    let mut problem_file_entries: Vec<PathBuf> = problem_folder_path
+    let problem_file_entries: Vec<PathBuf> = problem_folder_path
         .read_dir()?
         .map(|file| file.unwrap().path())
+        .sorted()
         .collect();
-
-    //Sort these file entries
-    codomain_file_entries.sort();
-    problem_file_entries.sort();
 
     assert_eq!(codomain_file_entries.len(), problem_file_entries.len());
 
     let mut result_vec = Vec::new();
 
-    //zip the codomains and problems, and read the clique tree from the codomain and problem files.
+    //zip the (sorted) codomains and problems, and read the clique tree from the codomain and problem files.
     for (codomain_file_entry, problem_file_entry) in codomain_file_entries
         .into_iter()
         .zip(problem_file_entries.into_iter())

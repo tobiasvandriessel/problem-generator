@@ -69,8 +69,7 @@ impl fmt::Display for CodomainFunction {
 }
 
 ///Generate random codomain values
-pub fn generate_random(input_parameters: &InputParameters) -> Vec<Vec<f64>> {
-    let mut rng = rand::thread_rng();
+pub fn generate_random(input_parameters: &InputParameters, rng: &mut StdRng) -> Vec<Vec<f64>> {
     let die = Uniform::from(0.0..1.0);
 
     let m = input_parameters.m;
@@ -84,7 +83,7 @@ pub fn generate_random(input_parameters: &InputParameters) -> Vec<Vec<f64>> {
     for _ in 0..m {
         let mut codomain_clique = Vec::with_capacity((1 << k) as usize);
         for _ in 0..(1 << k) {
-            codomain_clique.push(die.sample(&mut rng));
+            codomain_clique.push(die.sample(rng));
         }
         codomain_tree.push(codomain_clique);
     }
@@ -98,7 +97,7 @@ pub fn generate_random(input_parameters: &InputParameters) -> Vec<Vec<f64>> {
 /// The codomain values for each bit string other than these two is defined by their hamming distance to the local deceptive attractor:
 ///  0.9 - d * 0.9/k , where d is the hamming distance to the local deceptive attractor.
 /// The codomain value for the local optimum is 1.0
-pub fn generate_trap_general(input_parameters: &InputParameters) -> Vec<Vec<f64>> {
+pub fn generate_trap_general(input_parameters: &InputParameters, rng: &mut StdRng) -> Vec<Vec<f64>> {
     let m = input_parameters.m;
     let k = input_parameters.k;
 
@@ -109,7 +108,7 @@ pub fn generate_trap_general(input_parameters: &InputParameters) -> Vec<Vec<f64>
 
     let mut codomain = Vec::with_capacity(m as usize);
     for _i in 0..m {
-        let local_deceptor = get_random_solution(k);
+        let local_deceptor = get_random_solution(k, rng);
 
         let mut codomain_clique = Vec::with_capacity(1 << k);
         for j in 0..(1 << k) {
@@ -134,8 +133,7 @@ pub fn generate_trap_general(input_parameters: &InputParameters) -> Vec<Vec<f64>
 ///Generate the codomain for the combination of random and deceptive trap codomain functions:
 /// With probability p_deceptive, each clique/subfunction is a deceptive trap function,
 ///  and with probability (1 - p_deceptive) each clique/subfunction is a random function.
-pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64) -> Vec<Vec<f64>> {
-    let mut rng = rand::thread_rng();
+pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64, rng: &mut StdRng) -> Vec<Vec<f64>> {
     let die = Uniform::from(0.0..1.0);
 
     let m = input_parameters.m;
@@ -150,14 +148,14 @@ pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64
     for _ in 0..m {
         let mut codomain_clique = Vec::with_capacity(1 << k);
 
-        if die.sample(&mut rng) > p_deceptive {
+        if die.sample(rng) > p_deceptive {
             //Random
             for _ in 0..(1 << k) {
-                codomain_clique.push(die.sample(&mut rng));
+                codomain_clique.push(die.sample(rng));
             }
         } else {
             //Deceptive trap
-            let local_deceptor = get_random_solution(k);
+            let local_deceptor = get_random_solution(k, rng);
 
             for j in 0..(1 << k) {
                 let distance_to_deceptor = get_hamming_distance_to_solution(
@@ -217,17 +215,16 @@ pub fn generate_trap(input_parameters: &InputParameters, d: f64) -> Vec<Vec<f64>
 
 ///Generate NKq codomain values
 ///The q value indicates the highest integer value possible, every codomain value is generated randomly between 0..q(exclusive)
-pub fn generate_nk_q(input_parameters: &InputParameters, q: u32) -> Vec<Vec<f64>> {
+pub fn generate_nk_q(input_parameters: &InputParameters, q: u32, rng: &mut StdRng) -> Vec<Vec<f64>> {
     let m = input_parameters.m;
     let k = input_parameters.k;
 
-    let mut rng = rand::thread_rng();
     let die = Uniform::from(0..q);
 
     let mut codomain = Vec::with_capacity(m as usize);
     for _ in 0..m {
         let codomain_clique: Vec<f64> = (0..(1 << k))
-            .map(|_| die.sample(&mut rng) as f64 / (q - 1) as f64)
+            .map(|_| die.sample(rng) as f64 / (q - 1) as f64)
             .collect();
         codomain.push(codomain_clique);
     }
@@ -236,13 +233,12 @@ pub fn generate_nk_q(input_parameters: &InputParameters, q: u32) -> Vec<Vec<f64>
 
 ///Generate NKp codomain values
 ///The p value indicated the percentage of codomain values to be 0, per clique
-pub fn generate_nk_p(input_parameters: &InputParameters, p: f64) -> Vec<Vec<f64>> {
+pub fn generate_nk_p(input_parameters: &InputParameters, p: f64, rng: &mut StdRng) -> Vec<Vec<f64>> {
     let m = input_parameters.m;
     let k = input_parameters.k;
 
     let num_zeroes = (p * (1 << k) as f64).round() as u32;
 
-    let mut rng = rand::thread_rng();
     let die = Uniform::from(0.0..1.0);
 
     let mut codomain_clique_indices: Vec<u32> = (0..(1 << k)).collect();
@@ -250,7 +246,7 @@ pub fn generate_nk_p(input_parameters: &InputParameters, p: f64) -> Vec<Vec<f64>
 
     for _ in 0..m {
         let mut codomain_clique = Vec::with_capacity(k as usize);
-        codomain_clique_indices.shuffle(&mut rng);
+        codomain_clique_indices.shuffle(rng);
 
         let no_contribution_indices: Vec<&u32> = codomain_clique_indices
             .iter()
@@ -261,7 +257,7 @@ pub fn generate_nk_p(input_parameters: &InputParameters, p: f64) -> Vec<Vec<f64>
             if no_contribution_indices.contains(&&i) {
                 codomain_clique.push(0.0);
             } else {
-                codomain_clique.push(die.sample(&mut rng));
+                codomain_clique.push(die.sample(rng));
             }
         }
         codomain.push(codomain_clique);
@@ -282,9 +278,7 @@ fn count_ones(k: u32, index: u32) -> u32 {
 }
 
 ///Get a random solution, given the problem size
-fn get_random_solution(problem_size: u32) -> Vec<u32> {
-    let mut rng = rand::thread_rng();
+fn get_random_solution(problem_size: u32, rng: &mut StdRng) -> Vec<u32> {
     let die = Uniform::from(0..2);
-
-    (0..problem_size).map(|_| die.sample(&mut rng)).collect()
+    (0..problem_size).map(|_| die.sample(rng)).collect()
 }

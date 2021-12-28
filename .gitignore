@@ -1,4 +1,5 @@
 /target
 /.vscode
+/data
 problem_generator.h
 simple_client
