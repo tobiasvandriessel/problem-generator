@@ -10,6 +10,7 @@ use std::fmt;
 
 use rand::distributions::Uniform;
 use rand::prelude::*;
+use rand_chacha::ChaChaRng;
 
 ///Enum to represent various codomain classes
 #[repr(C)]
@@ -69,7 +70,7 @@ impl fmt::Display for CodomainFunction {
 }
 
 ///Generate random codomain values
-pub fn generate_random(input_parameters: &InputParameters, rng: &mut StdRng) -> Vec<Vec<f64>> {
+pub fn generate_random(input_parameters: &InputParameters, rng: &mut ChaChaRng) -> Vec<Vec<f64>> {
     let die = Uniform::from(0.0..1.0);
 
     let m = input_parameters.m;
@@ -97,7 +98,7 @@ pub fn generate_random(input_parameters: &InputParameters, rng: &mut StdRng) -> 
 /// The codomain values for each bit string other than these two is defined by their hamming distance to the local deceptive attractor:
 ///  0.9 - d * 0.9/k , where d is the hamming distance to the local deceptive attractor.
 /// The codomain value for the local optimum is 1.0
-pub fn generate_trap_general(input_parameters: &InputParameters, rng: &mut StdRng) -> Vec<Vec<f64>> {
+pub fn generate_trap_general(input_parameters: &InputParameters, rng: &mut ChaChaRng) -> Vec<Vec<f64>> {
     let m = input_parameters.m;
     let k = input_parameters.k;
 
@@ -133,7 +134,7 @@ pub fn generate_trap_general(input_parameters: &InputParameters, rng: &mut StdRn
 ///Generate the codomain for the combination of random and deceptive trap codomain functions:
 /// With probability p_deceptive, each clique/subfunction is a deceptive trap function,
 ///  and with probability (1 - p_deceptive) each clique/subfunction is a random function.
-pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64, rng: &mut StdRng) -> Vec<Vec<f64>> {
+pub fn generate_random_trap(input_parameters: &InputParameters, p_deceptive: f64, rng: &mut ChaChaRng) -> Vec<Vec<f64>> {
     let die = Uniform::from(0.0..1.0);
 
     let m = input_parameters.m;
@@ -215,7 +216,7 @@ pub fn generate_trap(input_parameters: &InputParameters, d: f64) -> Vec<Vec<f64>
 
 ///Generate NKq codomain values
 ///The q value indicates the highest integer value possible, every codomain value is generated randomly between 0..q(exclusive)
-pub fn generate_nk_q(input_parameters: &InputParameters, q: u32, rng: &mut StdRng) -> Vec<Vec<f64>> {
+pub fn generate_nk_q(input_parameters: &InputParameters, q: u32, rng: &mut ChaChaRng) -> Vec<Vec<f64>> {
     let m = input_parameters.m;
     let k = input_parameters.k;
 
@@ -233,7 +234,7 @@ pub fn generate_nk_q(input_parameters: &InputParameters, q: u32, rng: &mut StdRn
 
 ///Generate NKp codomain values
 ///The p value indicated the percentage of codomain values to be 0, per clique
-pub fn generate_nk_p(input_parameters: &InputParameters, p: f64, rng: &mut StdRng) -> Vec<Vec<f64>> {
+pub fn generate_nk_p(input_parameters: &InputParameters, p: f64, rng: &mut ChaChaRng) -> Vec<Vec<f64>> {
     let m = input_parameters.m;
     let k = input_parameters.k;
 
@@ -278,7 +279,7 @@ fn count_ones(k: u32, index: u32) -> u32 {
 }
 
 ///Get a random solution, given the problem size
-fn get_random_solution(problem_size: u32, rng: &mut StdRng) -> Vec<u32> {
+fn get_random_solution(problem_size: u32, rng: &mut ChaChaRng) -> Vec<u32> {
     let die = Uniform::from(0..2);
     (0..problem_size).map(|_| die.sample(rng)).collect()
 }

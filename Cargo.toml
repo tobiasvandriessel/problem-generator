@@ -15,7 +15,8 @@ keywords = ["problem", "generator", "benchmark", "landscape", "black-box" ]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rand = "0.7.3"
+rand = "0.8.4"
+rand_chacha = "0.3.1"
 log = "0.4.11"
 env_logger = "0.8.2"
 structopt = "0.3.21"

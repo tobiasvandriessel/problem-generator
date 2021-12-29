@@ -1,6 +1,6 @@
 use std::slice;
 
-use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codomain, codomain_subclasses::CodomainFunction};
+use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codomain, codomain_subclasses::CodomainFunction, configuration::get_rng};
 
 /// Construct CliqueTree (which represents the TD Mk Landscape) using the input parameters (M, k, o, b) 
 ///   and the codomain function to be used to generate the codomain. 
@@ -9,10 +9,12 @@ use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codom
 #[no_mangle]
 pub extern "C" fn construct_clique_tree(
     input_parameters: InputParameters,
-    codomain_function: CodomainFunction
-) -> *mut CliqueTree {
-    let codomain_values = generate_codomain(&input_parameters, &codomain_function);
-    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain_values);
+    codomain_function: CodomainFunction, //TODO: implement own version of Option<u64> with #[repr] and then translate here to regular Option type (::to() or ::from())
+    seed: Option<u64>, //TODO: ADDITIONAL Problem: when we return just the result and not the current seed, it's annoying to use, so return seed as well?
+) -> *mut CliqueTree { 
+    let mut rng = get_rng(seed);
+    let codomain_values = generate_codomain(&input_parameters, &codomain_function, &mut rng);
+    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain_values, &mut rng);
     Box::into_raw(Box::new(clique_tree))
 }
 
@@ -57,11 +59,13 @@ fn get_vector_codomain_from_pointer(
 pub extern "C" fn construct_clique_tree_custom_codomain(
     input_parameters: InputParameters,
     codomain: *const *const f64,
+    seed: Option<u64>,
 ) -> *mut CliqueTree {
+    let mut rng = get_rng(seed);
     //First copy the 2D pointer array for the codomain into a vector of vectors (which is necessary for our CliqueTree constructor)
     let codomain_values = get_vector_codomain_from_pointer(&input_parameters, codomain);
 
-    let clique_tree = CliqueTree::new(input_parameters, CodomainFunction::Unknown, codomain_values);
+    let clique_tree = CliqueTree::new(input_parameters, CodomainFunction::Unknown, codomain_values, &mut rng);
     Box::into_raw(Box::new(clique_tree))
 }
 

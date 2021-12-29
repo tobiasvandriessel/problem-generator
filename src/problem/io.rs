@@ -3,7 +3,7 @@ Module for functions related to reading and writing to files, mainly for reading
 */
 
 use itertools::Itertools;
-use rand::rngs::StdRng;
+use rand_chacha::ChaChaRng;
 use structopt::StructOpt;
 // use itertools::Itertools;
 use itertools::izip;
@@ -22,7 +22,7 @@ use super::codomain_subclasses::CodomainFunction;
 pub fn get_clique_tree_from_codomain_file(
     codomain_file_path: &Path,
     file_has_codomain_function: bool,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<CliqueTree, Box<dyn Error>> {
     let contents = fs::read_to_string(&codomain_file_path)?;
     let mut content_iterator = contents.lines();
@@ -60,7 +60,7 @@ pub fn get_clique_tree_from_codomain_file(
 pub fn get_clique_trees_paths_from_codomain_folder(
     folder_path: &Path,
     files_have_codomain_function: bool,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<Vec<(CliqueTree, PathBuf)>, Box<dyn Error>> {
     Ok(folder_path
         .read_dir()?
