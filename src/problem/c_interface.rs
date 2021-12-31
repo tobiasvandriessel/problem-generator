@@ -1,6 +1,17 @@
 use std::slice;
 
+use rand_chacha::ChaChaRng;
+
 use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codomain, codomain_subclasses::CodomainFunction, configuration::get_rng};
+
+
+#[no_mangle]
+pub extern "C" fn get_rng_c(
+    seed: Option<u64>,
+) -> *mut ChaChaRng {
+    let rng = get_rng(seed);
+    Box::into_raw(Box::new(rng))
+}
 
 /// Construct CliqueTree (which represents the TD Mk Landscape) using the input parameters (M, k, o, b) 
 ///   and the codomain function to be used to generate the codomain. 
@@ -10,11 +21,15 @@ use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codom
 pub extern "C" fn construct_clique_tree(
     input_parameters: InputParameters,
     codomain_function: CodomainFunction, //TODO: implement own version of Option<u64> with #[repr] and then translate here to regular Option type (::to() or ::from())
-    seed: Option<u64>, //TODO: ADDITIONAL Problem: when we return just the result and not the current seed, it's annoying to use, so return seed as well?
+    seed: Option<u64>, //TODO: ADDITIONAL Problem: when we return just the result and not the current seed, it's annoying to use, so return seed as well. -> No, don't return seed, because that stays the same. Instead, what we need to return is the word_pos, we can then pass this every time. 
+    rng_ptr: *mut ChaChaRng,
 ) -> *mut CliqueTree { 
-    let mut rng = get_rng(seed);
-    let codomain_values = generate_codomain(&input_parameters, &codomain_function, &mut rng);
-    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain_values, &mut rng);
+    let rng = unsafe {
+        assert!(!rng_ptr.is_null());
+        &mut *rng_ptr
+    };
+    let codomain_values = generate_codomain(&input_parameters, &codomain_function, rng);
+    let clique_tree = CliqueTree::new(input_parameters, codomain_function, codomain_values, rng);
     Box::into_raw(Box::new(clique_tree))
 }
 
@@ -60,12 +75,16 @@ pub extern "C" fn construct_clique_tree_custom_codomain(
     input_parameters: InputParameters,
     codomain: *const *const f64,
     seed: Option<u64>,
-) -> *mut CliqueTree {
-    let mut rng = get_rng(seed);
+    rng_ptr: *mut ChaChaRng,
+) -> *mut CliqueTree { 
+    let rng = unsafe {
+        assert!(!rng_ptr.is_null());
+        &mut *rng_ptr
+    };
     //First copy the 2D pointer array for the codomain into a vector of vectors (which is necessary for our CliqueTree constructor)
     let codomain_values = get_vector_codomain_from_pointer(&input_parameters, codomain);
 
-    let clique_tree = CliqueTree::new(input_parameters, CodomainFunction::Unknown, codomain_values, &mut rng);
+    let clique_tree = CliqueTree::new(input_parameters, CodomainFunction::Unknown, codomain_values, rng);
     Box::into_raw(Box::new(clique_tree))
 }
 
