@@ -40,17 +40,18 @@ int main() {
     CodomainFunction codomainFunction = CodomainFunction();
     codomainFunction.tag = CodomainFunction::Tag::DeceptiveTrap; 
 
-    const uint64_t seed = 2386;
+    const uint64_t seed = 2398;
     chaChaRng = get_rng_c(&seed);
 
     CliqueTreeC cliqueTree(inputParameters, codomainFunction, chaChaRng);
 
 
-    const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
+    // const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
+    const std::vector<int> x = {0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0};
     double fitness = cliqueTree.evaluate(x);
 
-    // cout << "Fitness: " << fitness << endl;
-    // cout << "Global optimum found: " << cliqueTree.globalOptimumFound << endl;
+    cout << "Fitness: " << fitness << endl;
+    cout << "Global optimum found: " << boolalpha << cliqueTree.globalOptimumFound << endl;
 
 }
 

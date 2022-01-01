@@ -5,6 +5,8 @@ use rand_chacha::ChaChaRng;
 use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codomain, codomain_subclasses::CodomainFunction, configuration::get_rng};
 
 
+/// Get a random number generator, required for generating codomain values or constructing clique trees.
+/// If the seed parameter is a null pointer, a random seed will be generated.
 #[no_mangle]
 pub extern "C" fn get_rng_c(
     seed: Option<&u64>,
