@@ -2,13 +2,14 @@
 #include <algorithm>
 #include <set>
 #include <vector>
-#include "problem_generator.h"
+#include "target/problem_generator.h"
 #include <stdexcept>
 
 using namespace std;
 
 const double FITNESS_EPSILON = 0.0000000001;
 
+ChaChaRng* chaChaRng;
 
 class CliqueTreeC {
     private: 
@@ -23,7 +24,7 @@ class CliqueTreeC {
     public:
         bool globalOptimumFound;
 
-        CliqueTreeC(InputParameters inputParameters, CodomainFunction codomainFunction );
+        CliqueTreeC(InputParameters inputParameters, CodomainFunction codomainFunction, ChaChaRng* chaChaRng);
         ~CliqueTreeC();
 
         double evaluate(const std::vector<int> &x);
@@ -39,8 +40,10 @@ int main() {
     CodomainFunction codomainFunction = CodomainFunction();
     codomainFunction.tag = CodomainFunction::Tag::DeceptiveTrap; 
 
+    const uint64_t seed = 2386;
+    chaChaRng = get_rng_c(&seed);
 
-    CliqueTreeC cliqueTree(inputParameters, codomainFunction);
+    CliqueTreeC cliqueTree(inputParameters, codomainFunction, chaChaRng);
 
 
     const std::vector<int> x = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0};
@@ -51,11 +54,11 @@ int main() {
 
 }
 
-CliqueTreeC::CliqueTreeC(InputParameters inputParameters, CodomainFunction codomainFunction ) {
+CliqueTreeC::CliqueTreeC(InputParameters inputParameters, CodomainFunction codomainFunction, ChaChaRng* chaChaRng ) {
 
     uintptr_t length = (inputParameters.m - 1) * (inputParameters.k - inputParameters.o) + inputParameters.k;
 
-    this->cliqueTree = construct_clique_tree(inputParameters, codomainFunction);
+    this->cliqueTree = construct_clique_tree(inputParameters, codomainFunction, chaChaRng);
 
     uintptr_t num_glob_opt = get_number_of_global_optima(this->cliqueTree);
     this->globOptScore = get_score_of_global_optima(this->cliqueTree);
