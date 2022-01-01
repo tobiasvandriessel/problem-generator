@@ -7,9 +7,10 @@ use super::{clique_tree::{CliqueTree, InputParameters}, codomain::generate_codom
 
 #[no_mangle]
 pub extern "C" fn get_rng_c(
-    seed: Option<u64>,
+    seed: Option<&u64>,
 ) -> *mut ChaChaRng {
-    let rng = get_rng(seed);
+    let seed_new = seed.map(|&x| x);
+    let rng = get_rng(seed_new);
     Box::into_raw(Box::new(rng))
 }
 
@@ -20,8 +21,8 @@ pub extern "C" fn get_rng_c(
 #[no_mangle]
 pub extern "C" fn construct_clique_tree(
     input_parameters: InputParameters,
-    codomain_function: CodomainFunction, //TODO: implement own version of Option<u64> with #[repr] and then translate here to regular Option type (::to() or ::from())
-    seed: Option<u64>, //TODO: ADDITIONAL Problem: when we return just the result and not the current seed, it's annoying to use, so return seed as well. -> No, don't return seed, because that stays the same. Instead, what we need to return is the word_pos, we can then pass this every time. 
+    codomain_function: CodomainFunction, 
+    //TODO: use this in simple client?     ADDITIONAL Problem: when we return just the result and not the current seed, it's annoying to use, so return seed as well. -> No, don't return seed, because that stays the same. Instead, what we need to return is the word_pos, we can then pass this every time. 
     rng_ptr: *mut ChaChaRng,
 ) -> *mut CliqueTree { 
     let rng = unsafe {
@@ -74,7 +75,6 @@ fn get_vector_codomain_from_pointer(
 pub extern "C" fn construct_clique_tree_custom_codomain(
     input_parameters: InputParameters,
     codomain: *const *const f64,
-    seed: Option<u64>,
     rng_ptr: *mut ChaChaRng,
 ) -> *mut CliqueTree { 
     let rng = unsafe {
