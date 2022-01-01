@@ -3,7 +3,7 @@ Module for codomain generation, reading, and writing.
 */
 
 use indicatif::ProgressIterator;
-use rand::rngs::StdRng;
+use rand_chacha::ChaChaRng;
 use structopt::StructOpt;
 use itertools::Itertools;
 
@@ -102,7 +102,7 @@ pub fn run_opt(codomain_opt: CodomainOpt) -> Result<(), Box<dyn Error>> {
 }
 
 ///Handle codomain generation for a folder: for every entry in it that is not a folder, pass the file to handle_input_file
-fn handle_folder(folder_path: PathBuf, rng: &mut StdRng) -> Result<(), Box<dyn Error>> {
+fn handle_folder(folder_path: PathBuf, rng: &mut ChaChaRng) -> Result<(), Box<dyn Error>> {
     //First we remove all folders that are not named codomain_generation
     folder_path
         .read_dir()?
@@ -136,7 +136,7 @@ fn handle_folder(folder_path: PathBuf, rng: &mut StdRng) -> Result<(), Box<dyn E
 /// getting the output directory path from the filename and generating the codomain 25 times for all input parameters.
 fn handle_input_configuration_file(
     input_configuration_file_path: PathBuf,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
     let experiment_parameters = ConfigurationParameters::from_file(&input_configuration_file_path)?;
     let codomain_function = experiment_parameters.codomain_function.clone();
@@ -177,7 +177,7 @@ pub fn handle_input_configuration_file_return_hashmap(
     input_configuration_file_path: &Path,
     output_codomain_folder: Option<&Path>,
     number_problems: u32,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<HashMap<InputParameters, Vec<Vec<Vec<f64>>>>, Box<dyn Error>> {
     let mut input_parameters_codomain_hashmap = HashMap::new();
     let experiment_parameters = ConfigurationParameters::from_file(input_configuration_file_path)?;
@@ -229,7 +229,7 @@ fn generate_and_write(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
     output_file_path: &Path,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
     write_codomain(
         input_parameters,
@@ -245,7 +245,7 @@ fn generate_write_return(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
     output_file_path: &Path,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<Vec<Vec<f64>>, Box<dyn Error>> {
     let codomain = generate_codomain(input_parameters, codomain_function, rng);
     write_codomain(
@@ -261,7 +261,7 @@ fn generate_write_return(
 pub fn generate_codomain(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Vec<Vec<f64>> {
     match codomain_function {
         CodomainFunction::Random => generate_random(input_parameters, rng),

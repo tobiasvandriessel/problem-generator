@@ -2,7 +2,7 @@
 Module for the 1) Clique Tree construction and global optimum calculation, 2) and the struct to contain solutions.
 */
 
-use rand::rngs::StdRng;
+use rand_chacha::ChaChaRng;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 
@@ -104,7 +104,7 @@ impl CliqueTree {
         input_parameters: InputParameters,
         codomain_function: CodomainFunction,
         codomain_values: Vec<Vec<f64>>,
-        rng: &mut StdRng,
+        rng: &mut ChaChaRng,
     ) -> CliqueTree {
         //Create a new clique tree (as its cliques and separators)
         let (cliques, separators) = CliqueTree::construct(&input_parameters, rng);
@@ -636,7 +636,7 @@ impl CliqueTree {
     }
 
     ///Construct the clique tree, using the input paramters and the codomain values. It returns a tuple (cliques, separators)
-    pub fn construct(input_parameters: &InputParameters, rng: &mut StdRng) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
+    pub fn construct(input_parameters: &InputParameters, rng: &mut ChaChaRng) -> (Vec<Vec<u32>>, Vec<Vec<u32>>) {
         let mut cliques: Vec<Vec<u32>> = Vec::with_capacity(input_parameters.m as usize);
         let mut separators: Vec<Vec<u32>> = Vec::with_capacity(input_parameters.m as usize);
 

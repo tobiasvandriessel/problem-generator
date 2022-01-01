@@ -3,7 +3,7 @@ Module to generate problems (TD Mk Landscapes) using passed codomain, read these
 */
 
 use itertools::Itertools;
-use rand::rngs::StdRng;
+use rand_chacha::ChaChaRng;
 use serde::{Deserialize, Serialize};
 use structopt::StructOpt;
 
@@ -174,7 +174,7 @@ impl Problem {
 pub fn generate_problems_from_codomain_folder(
     parent_folder_path: &Path,
     generated: bool,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
     let mut codomain_folder_path = PathBuf::from(parent_folder_path);
     codomain_folder_path.push("codomain_files");
@@ -219,7 +219,7 @@ pub fn generate_problems_from_codomain_folder(
 pub fn generate_codomain_and_problem_from_folder(
     input_folder_path: &Path,
     number_of_problems_to_generate: u32,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
     //Use the input_folder_path to get the problem_generation folder and problems folder paths
     let mut problem_generation_path = PathBuf::from(input_folder_path);
@@ -247,7 +247,7 @@ pub fn generate_codomain_and_problem(
     output_codomain_folder_path: Option<&Path>,
     output_problem_folder_path: Option<&Path>,
     number_of_problems_to_generate: u32,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
     //Generate codomain from an input file (path), and insert in a hashmap the 25 generated codomains per input parameter configuration.
     let mut input_parameters_codomain_hashmap = handle_input_configuration_file_return_hashmap(
@@ -317,7 +317,7 @@ pub fn generate_problem_from_codomain_file(
     codomain_file_path: &Path,
     output_problem_file_path: &Path,
     generated: bool,
-    rng: &mut StdRng
+    rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
     //Get the clique tree from the codomain file
     let clique_tree = get_clique_tree_from_codomain_file(codomain_file_path, generated, rng)?;

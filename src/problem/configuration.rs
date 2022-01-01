@@ -3,7 +3,7 @@ Module for reading the configuration ranges (and iterating over it)
 */
 
 use structopt::StructOpt;
-use rand::rngs::StdRng;
+use rand_chacha::ChaChaRng;
 use rand::SeedableRng;
 
 use std::{error::Error, path::Path};
@@ -224,9 +224,9 @@ fn get_m_for_max_problem_size(max_problem_size: u32, k: u32, o: u32) -> u32 {
     (a.ceil() as u32).max(2)
 }
 
-pub fn get_rng(seed: Option<u64>) -> StdRng {
+pub fn get_rng(seed: Option<u64>) -> ChaChaRng {
     match seed {
-        Some(seed) => StdRng::seed_from_u64(seed),
-        None => StdRng::from_entropy(),
+        Some(seed) => ChaChaRng::seed_from_u64(seed),
+        None => ChaChaRng::from_entropy(),
     }
 }
