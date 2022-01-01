@@ -226,7 +226,7 @@ fn get_m_for_max_problem_size(max_problem_size: u32, k: u32, o: u32) -> u32 {
 
 pub fn get_rng(seed: Option<u64>) -> ChaChaRng {
     match seed {
-        Some(seed) => rand_chacha::rand_core::SeedableRng::seed_from_u64(seed),
+        Some(seed) => ChaChaRng::seed_from_u64(seed),
         None => ChaChaRng::from_entropy(),
     }
 }
