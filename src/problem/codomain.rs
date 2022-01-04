@@ -13,7 +13,6 @@ use super::clique_tree::InputParameters;
 use super::codomain_subclasses::*;
 use super::configuration::{ConfigurationParameters, get_rng};
 
-use std::collections::HashMap;
 use std::fmt::Write as fmtWrite;
 use std::fs::File;
 use std::io::{BufWriter, Write};
@@ -170,60 +169,6 @@ fn handle_input_configuration_file(
     Ok(())
 }
 
-///Generate codomain from an input file (path) and return a hashmap with the 25 generated codomains per input parameter configuration.
-/// We do so by reading the parameters from the input configuration file,
-/// getting the output directory path from the filename and generating the codomain 25 times for all input parameters.
-pub fn handle_input_configuration_file_return_hashmap(
-    input_configuration_file_path: &Path,
-    output_codomain_folder: Option<&Path>,
-    number_problems: u32,
-    rng: &mut ChaChaRng
-) -> Result<HashMap<InputParameters, Vec<Vec<Vec<f64>>>>, Box<dyn Error>> {
-    let mut input_parameters_codomain_hashmap = HashMap::new();
-    let experiment_parameters = ConfigurationParameters::from_file(input_configuration_file_path)?;
-
-    let codomain_function = experiment_parameters.codomain_function.clone();
-
-    //if a output_directory path is passed, we use it, otherwise we default to our way of calculating where the file should go (into codomain_files)
-    let directory_path_buf = match output_codomain_folder {
-        Some(folder) => PathBuf::from(folder),
-        None => get_output_folder_path_from_configuration_file(
-            input_configuration_file_path,
-            "codomain_files",
-        )?,
-    };
-
-    //Loop over all input parameters (using custom iterator)
-    for input_parameters in experiment_parameters {
-        //Store 25 different 'codomains' per input_parameters instance
-        let mut codomains = Vec::new();
-        //Generate number_problems different codomain instances for each input parameter configuration
-        for num in 0..number_problems {
-            let mut output_file_path = directory_path_buf.clone();
-            let output_file_name = format!(
-                "{}_{}_{}_{}_{}_{}.txt",
-                codomain_function.to_io_string(),
-                input_parameters.m,
-                input_parameters.k,
-                input_parameters.o,
-                input_parameters.b,
-                num
-            );
-
-            output_file_path.push(output_file_name);
-            //println!("constructed output file path: {:?}", output_file_path);
-
-            let codomain =
-                generate_write_return(&input_parameters, &codomain_function, &output_file_path, rng)?;
-
-            codomains.push(codomain);
-        }
-        input_parameters_codomain_hashmap.insert(input_parameters, codomains);
-    }
-
-    Ok(input_parameters_codomain_hashmap)
-}
-
 ///Generate the codomain and write them to the file
 fn generate_and_write(
     input_parameters: &InputParameters,
@@ -241,7 +186,7 @@ fn generate_and_write(
 }
 
 ///Generate the codomain, write them to the file, and return the codomain values
-fn generate_write_return(
+pub fn generate_write_return(
     input_parameters: &InputParameters,
     codomain_function: &CodomainFunction,
     output_file_path: &Path,

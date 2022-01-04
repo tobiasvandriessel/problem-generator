@@ -3,6 +3,8 @@ use std::fs;
 
 use problem_generator::{self, problem::problem_generation::{run_opt, ProblemOpt, ProblemCommand::ConfigurationFolder}};
 
+//DEV: when changes are made to the reproducability in any way, regenerate the problem output to add here, by running:
+// ./target/release/problem_generator -s 2398 configuration_folder ./data/tiny_test
 #[test]
 fn deceptive_trap_generated() {
     let problem_command = ConfigurationFolder {
