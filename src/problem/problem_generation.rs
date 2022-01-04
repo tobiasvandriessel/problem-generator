@@ -15,12 +15,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::io::get_output_folder_path_from_configuration_file;
 
 use super::{
     clique_tree::{CliqueTree, InputParameters},
-    codomain::{handle_input_configuration_file_return_hashmap, read_codomain},
-    io::{get_clique_tree_from_codomain_file, get_clique_trees_paths_from_codomain_folder},
+    codomain::{read_codomain, generate_write_return},
+    io::{get_clique_tree_from_codomain_file, get_clique_trees_paths_from_codomain_folder, 
+            get_output_folder_path_from_configuration_file},
     configuration::{get_rng}
 };
 
@@ -249,14 +249,6 @@ pub fn generate_codomain_and_problem(
     number_of_problems_to_generate: u32,
     rng: &mut ChaChaRng
 ) -> Result<(), Box<dyn Error>> {
-    //Generate codomain from an input file (path), and insert in a hashmap the 25 generated codomains per input parameter configuration.
-    let mut input_parameters_codomain_hashmap = handle_input_configuration_file_return_hashmap(
-        input_configuration_file_path,
-        output_codomain_folder_path,
-        number_of_problems_to_generate,
-        rng
-    )?;
-
     //Get the configuration parameters from the input configuration file
     let configuration_parameters =
         ConfigurationParameters::from_file(input_configuration_file_path)?;
@@ -272,17 +264,23 @@ pub fn generate_codomain_and_problem(
         )?,
     };
 
+    //if a output_codomain_folder_path is passed, we use it, otherwise we default to our way of calculating where the file should go (into codomain_files)
+    let output_codomain_folder_path_buf = match output_codomain_folder_path {
+        Some(folder) => PathBuf::from(folder),
+        None => get_output_folder_path_from_configuration_file(
+            input_configuration_file_path,
+            "codomain_files",
+        )?,
+    };
+
     //Loop over all input parameters (using custom iterator)
     for input_parameters in configuration_parameters {
-        //Get the stored codomain values for this input_parameters, (which contains the n codomain_values instances)
-        let codomains = input_parameters_codomain_hashmap
-            .remove(&input_parameters)
-            .ok_or("could not retrieve codomains from hashmap")?;
-
         //Generate number_problems different problem instances for each input parameter configuration
         for num in 0..number_of_problems_to_generate {
             let mut output_problem_file_path = output_problem_folder_path_buf.clone();
-            let output_problem_file_name = format!(
+            let mut output_codomain_file_path = output_codomain_folder_path_buf.clone();
+
+            let output_file_name = format!(
                 "{}_{}_{}_{}_{}_{}.txt",
                 codomain_function.to_io_string(),
                 input_parameters.m,
@@ -292,11 +290,13 @@ pub fn generate_codomain_and_problem(
                 num
             );
 
-            output_problem_file_path.push(output_problem_file_name);
+            output_problem_file_path.push(output_file_name.clone());
+            output_codomain_file_path.push(output_file_name);
             //println!("constructed output file path: {:?}", output_file_path);
 
-            //Get the generated codomain values from the list of n codomain_values instances
-            let codomain = codomains[num as usize].clone();
+            let codomain =
+                generate_write_return(&input_parameters, &codomain_function, &output_codomain_file_path, rng)?;
+
             //Generate a clique tree using the input parameter, the codomain function, and the codomain values
             let clique_tree = CliqueTree::new(
                 input_parameters.clone(),
