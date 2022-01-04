@@ -24,7 +24,6 @@ pub extern "C" fn get_rng_c(
 pub extern "C" fn construct_clique_tree(
     input_parameters: InputParameters,
     codomain_function: CodomainFunction, 
-    //TODO: use this in simple client?     ADDITIONAL Problem: when we return just the result and not the current seed, it's annoying to use, so return seed as well. -> No, don't return seed, because that stays the same. Instead, what we need to return is the word_pos, we can then pass this every time. 
     rng_ptr: *mut ChaChaRng,
 ) -> *mut CliqueTree { 
     let rng = unsafe {
