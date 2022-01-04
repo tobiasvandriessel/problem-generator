@@ -10,7 +10,7 @@ To use problem_generator in your project, you can simply add problem_generator i
 
 ```toml
 [dependencies]
-problem_generator = "^0.2.1"
+problem_generator = "^0.3.0"
 ```
 */
 
