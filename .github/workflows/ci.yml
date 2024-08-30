@@ -26,6 +26,7 @@ on:
         push: 
                 tags:
                         - "v*"
+        workflow_dispatch:
 
 jobs: 
         release:
@@ -45,7 +46,7 @@ jobs:
                                           asset_name: problem-generator-windows-amd64.exe
                 steps:
                         - name: Checkout code
-                          uses: actions/checkout@v2
+                          uses: actions/checkout@v3
                         - name: Update Cargo
                           run: cargo update
                         - name: Build project
@@ -55,7 +56,7 @@ jobs:
                           run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
                           shell: bash
                         - name: Upload binary to release
-                          uses: svenstaro/upload-release-action@v1-release
+                          uses: svenstaro/upload-release-action@v2
                           with: 
                                 repo_token: ${{ secrets.GITHUB_TOKEN }}
                                 file: target/release/${{ matrix.artifact_name }}
