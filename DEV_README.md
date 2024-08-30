@@ -24,6 +24,8 @@ To push the tag and trigger build and release on Github, run:
 git push origin v0.3.1
 ```
 
+Check whether a release was succesfully published on GitHub, and check the title and description.
+
 ## Update crate on crates.io
 
 To dry run the publishing, run:
