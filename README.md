@@ -62,6 +62,8 @@ deceptive-trap
 
 Then enter ```problem_generator configuration_folder example``` to generate 1 problem per configuration, which can be found in the `problems` folder. The accompanying codomain values can be found in the `codomain_files` folder.
 
+Refer to [the binary's documentation](https://tobiasvandriessel.github.io/problem-generator/) to find out more about all available options.
+
 ### Library 
 
 #### Rust
@@ -70,10 +72,10 @@ To use problem_generator in your project, you can simply add problem_generator i
 
 ```toml
 [dependencies]
-problem_generator = "^0.3.0"
+problem_generator = "0.3.1"
 ```
 
-The library documentation can be found on [doc.rs](https://docs.rs/problem_generator/0.3.0).
+The library documentation can be found on [doc.rs](https://docs.rs/problem_generator/0.3.1).
 
 #### C++
 
